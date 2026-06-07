@@ -6,6 +6,7 @@ import { GiGraduateCap } from 'react-icons/gi';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import clsx from 'clsx';
+import usePageTitle from '../hooks/usePageTitle';
 
 function PasswordStrength({ password }) {
   const checks = {
@@ -40,6 +41,7 @@ function PasswordStrength({ password }) {
 }
 
 export default function Register() {
+  usePageTitle('Register'); // L25
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);

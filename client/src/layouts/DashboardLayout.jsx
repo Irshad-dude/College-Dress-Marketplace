@@ -15,14 +15,16 @@ import { useNotifications } from '../context/NotificationContext';
 import NotificationBell from '../components/NotificationBell';
 import DarkModeToggle from '../components/DarkModeToggle';
 import { getInitials } from '../utils/helpers';
+import usePageTitle from '../hooks/usePageTitle';
 
-const navLinks = [
-  { to: '/dashboard', icon: MdDashboard, label: 'Dashboard', end: true },
-  { to: '/dashboard/my-products', icon: MdInventory2, label: 'My Products' },
-  { to: '/dashboard/add-product', icon: MdAddBox, label: 'Add Product' },
-  { to: '/dashboard/chat', icon: MdChat, label: 'Chat' },
-  { to: '/dashboard/notifications', icon: MdNotifications, label: 'Notifications' },
-  { to: '/dashboard/profile', icon: MdPerson, label: 'Profile' },
+// L26: Split nav links by role
+const ALL_NAV_LINKS = [
+  { to: '/dashboard',               icon: MdDashboard,     label: 'Dashboard',     roles: null, end: true },
+  { to: '/dashboard/my-products',   icon: MdInventory2,    label: 'My Products',   roles: ['seller'] },
+  { to: '/dashboard/add-product',   icon: MdAddBox,        label: 'Add Product',   roles: ['seller'] },
+  { to: '/dashboard/chat',          icon: MdChat,          label: 'Chat',          roles: null },
+  { to: '/dashboard/notifications', icon: MdNotifications, label: 'Notifications', roles: null },
+  { to: '/dashboard/profile',       icon: MdPerson,        label: 'Profile',       roles: null },
 ];
 
 const pageTitles = {
@@ -36,10 +38,18 @@ const pageTitles = {
 
 export default function DashboardLayout() {
   const { logout, user } = useAuth();
-  const { unreadCount } = useNotifications();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { unreadCount }  = useNotifications();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
+
+  // L25: Set browser tab title
+  usePageTitle(pageTitle);
+
+  // L26: Filter nav links by role — buyers don't see seller-only links
+  const navLinks = ALL_NAV_LINKS.filter(
+    ({ roles }) => !roles || roles.includes(user?.role)
+  );
 
   const handleLogout = async () => {
     await logout();

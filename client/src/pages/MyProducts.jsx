@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { MdEdit, MdDelete, MdCheckCircle, MdAdd } from 'react-icons/md';
@@ -11,6 +12,7 @@ import EmptyState from '../components/EmptyState';
 import { SIZES, CONDITIONS, DEPARTMENTS } from '../constants';
 
 export default function MyProducts() {
+  usePageTitle('My Products'); // L25
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

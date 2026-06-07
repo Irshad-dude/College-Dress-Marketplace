@@ -1,18 +1,30 @@
 const jwt = require('jsonwebtoken');
 
 /**
- * Generate a signed JWT token for a given user ID.
- * Token expires in 24 hours.
+ * Generate a short-lived ACCESS token (15 minutes).
+ * Used for API authentication. Stored in httpOnly 'jwt' cookie.
+ * Also returned in response body for Socket.IO in-memory use.
  *
- * @param {string} userId - The MongoDB ObjectId of the user
- * @returns {string} Signed JWT token
+ * @param {string} userId - MongoDB ObjectId string
+ * @returns {string} Signed JWT
  */
-const generateToken = (userId) => {
-  return jwt.sign(
-    { id: userId },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
-};
+const generateAccessToken = (userId) =>
+  jwt.sign({ id: userId, type: 'access' }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-module.exports = generateToken;
+/**
+ * Generate a long-lived REFRESH token (7 days).
+ * Used only to obtain new access tokens.
+ * Stored in httpOnly 'refreshToken' cookie. Never sent to client as plain text.
+ *
+ * @param {string} userId - MongoDB ObjectId string
+ * @returns {string} Signed JWT
+ */
+const generateRefreshToken = (userId) =>
+  jwt.sign({ id: userId, type: 'refresh' }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET + '_refresh', {
+    expiresIn: '7d',
+  });
+
+// Backward-compatible alias — existing code using generateToken still works
+const generateToken = generateAccessToken;
+
+module.exports = { generateToken, generateAccessToken, generateRefreshToken };

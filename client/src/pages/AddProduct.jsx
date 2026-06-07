@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import ImageUpload from '../components/ImageUpload';
 import { SIZES, CONDITIONS, DEPARTMENTS, PRODUCT_TYPES } from '../constants';
 
 export default function AddProduct() {
+  usePageTitle('Add Product'); // L25
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
   const [imageFiles, setImageFiles] = useState([]);
   const [loading, setLoading] = useState(false);

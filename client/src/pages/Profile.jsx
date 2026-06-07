@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
@@ -7,6 +8,7 @@ import { updateProfile } from '../services/authService';
 import { getInitials, formatDate } from '../utils/helpers';
 
 export default function Profile() {
+  usePageTitle('Profile'); // L25
   const { user, updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);

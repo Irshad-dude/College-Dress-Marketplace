@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProducts } from '../services/productService';
@@ -10,6 +11,7 @@ import EmptyState from '../components/EmptyState';
 import { MdSearch } from 'react-icons/md';
 
 export default function Products() {
+  usePageTitle('All Products'); // L25
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
@@ -107,11 +109,23 @@ export default function Products() {
               {Array(9).fill(0).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : products.length === 0 ? (
-            <EmptyState
-              icon={<MdSearch className="text-5xl text-gray-300" />}
-              title="No products found"
-              message="Try adjusting your search or filters"
-            />
+            <div className="text-center py-16">
+              <MdSearch className="text-6xl text-gray-200 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-1">
+                {search ? `No results for "${search}"` : 'No products found'}
+              </h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Try adjusting your search or filters to find what you're looking for.
+              </p>
+              {(search || size || condition || minPrice || maxPrice) && (
+                <button
+                  onClick={() => setSearchParams(new URLSearchParams())}
+                  className="btn-primary text-sm"
+                >
+                  Clear All Filters
+                </button>
+              )}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {products.map((p) => <ProductCard key={p._id} product={p} />)}

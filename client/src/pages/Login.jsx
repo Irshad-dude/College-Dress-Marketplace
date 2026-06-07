@@ -5,9 +5,11 @@ import { toast } from 'react-toastify';
 import { GiGraduateCap } from 'react-icons/gi';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Login() {
   const { login } = useAuth();
+  usePageTitle('Login');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

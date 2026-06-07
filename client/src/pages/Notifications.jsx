@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useEffect } from 'react';
 import { MdNotifications, MdFavorite, MdChat, MdLocalOffer, MdDoneAll } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -12,6 +13,7 @@ const typeIcons = {
 };
 
 export default function Notifications() {
+  usePageTitle('Notifications'); // L25
   const { notifications, unreadCount, fetchNotifications, markAllRead, markOneRead } = useNotifications();
 
   useEffect(() => {

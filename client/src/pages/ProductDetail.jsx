@@ -10,6 +10,7 @@ import { createOrGetChat } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice, formatDate, getInitials } from '../utils/helpers';
 import Loader from '../components/Loader';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -21,6 +22,9 @@ export default function ProductDetail() {
   const [interestLoading, setInterestLoading] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [soldLoading, setSoldLoading] = useState(false);
+
+  // L25: Dynamic title updates when product loads
+  usePageTitle(product?.title || 'Product Details');
 
   useEffect(() => {
     getProductById(id)
@@ -85,9 +89,9 @@ export default function ProductDetail() {
     toast.info('Link copied to clipboard!');
   };
 
-  const images = product.images?.length > 0
-    ? product.images
-    : ['https://via.placeholder.com/600x400?text=No+Image'];
+  // H12: Use a local emoji fallback — no external service dependency
+  const FALLBACK_IMG = null;
+  const images = product.images?.length > 0 ? product.images : [FALLBACK_IMG];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -105,11 +109,19 @@ export default function ProductDetail() {
                 <span className="text-white text-3xl font-extrabold tracking-widest bg-red-500 px-6 py-2 rounded-full">SOLD</span>
               </div>
             )}
-            <img
-              src={images[activeImg]}
-              alt={product.title}
-              className="w-full h-full object-cover"
-            />
+            {images[activeImg] ? (
+              <img
+                src={images[activeImg]}
+                alt={product.title}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-amber-50">
+                <span className="text-8xl">👗</span>
+              </div>
+            )}
           </div>
           {images.length > 1 && (
             <div className="flex gap-2 flex-wrap">

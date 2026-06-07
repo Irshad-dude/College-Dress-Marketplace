@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MdAdd, MdInventory, MdCheckCircle, MdNotifications, MdChat } from 'react-icons/md';
@@ -22,6 +23,7 @@ function StatCard({ icon, label, value, color }) {
 }
 
 export default function Dashboard() {
+  usePageTitle('Dashboard'); // L25
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
   const [myProducts, setMyProducts] = useState([]);

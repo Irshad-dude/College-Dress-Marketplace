@@ -25,10 +25,17 @@ const notificationSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  // Optional reference to the related product — useful for "sold" and "interest" notifications
+  // Reference to the related product (for 'interest' and 'sold' notifications)
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
+    default: null,
+  },
+  // H11: Store the buyer who expressed interest so we can deduplicate correctly.
+  // Previously the duplicate check was wrong — now we check (sellerId + productId + buyerId)
+  buyerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     default: null,
   },
   createdAt: {
@@ -40,5 +47,11 @@ const notificationSchema = new mongoose.Schema({
 // Indexes for fast notification lookup (M4 fix)
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, isRead: 1 });
+
+// H11: Compound index to enforce unique interest per buyer per product
+notificationSchema.index(
+  { userId: 1, productId: 1, type: 1, buyerId: 1 },
+  { unique: true, partialFilterExpression: { type: 'interest', buyerId: { $ne: null } } }
+);
 
 module.exports = mongoose.model('Notification', notificationSchema);

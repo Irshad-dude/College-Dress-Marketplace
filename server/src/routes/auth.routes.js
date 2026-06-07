@@ -1,11 +1,14 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+
 const {
   register,
   login,
   logout,
+  refreshToken,
   getProfile,
   updateProfile,
+  changePassword,
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 const {
@@ -20,13 +23,19 @@ router.post('/register', registerValidationRules, validate, register);
 // POST /api/v1/auth/login
 router.post('/login', loginValidationRules, validate, login);
 
+// POST /api/v1/auth/logout — clears both httpOnly cookies (C1)
+router.post('/logout', logout);
+
+// POST /api/v1/auth/refresh-token — issues new access + refresh tokens (H6)
+router.post('/refresh-token', refreshToken);
+
 // GET  /api/v1/auth/profile
 router.get('/profile', protect, getProfile);
 
 // PUT  /api/v1/auth/profile
 router.put('/profile', protect, updateProfile);
 
-// POST /api/v1/auth/logout — clears httpOnly cookie (C1 fix)
-router.post('/logout', logout);
+// PUT  /api/v1/auth/password — change password (H7)
+router.put('/password', protect, changePassword);
 
 module.exports = router;

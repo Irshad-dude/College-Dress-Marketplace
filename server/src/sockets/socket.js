@@ -1,6 +1,7 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Chat = require('../models/Chat');
+const jwt    = require('jsonwebtoken');
+const User   = require('../models/User');
+const Chat   = require('../models/Chat');
+const logger = require('../utils/logger');
 
 /**
  * H5 fix: Map<userId, Set<socketId>> to support multiple tabs/sessions per user.
@@ -42,7 +43,7 @@ const initSocket = (io) => {
   // ── Connection handler ───────────────────────────────────────────────────────
   io.on('connection', (socket) => {
     const userId = socket.user.id;
-    console.log(`🔌 Socket connected: userId=${userId}, socketId=${socket.id}`);
+    logger.info({ userId, socketId: socket.id }, 'Socket connected');
 
     // H5: Add to set of sockets for this user (multi-tab support)
     if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
@@ -82,7 +83,7 @@ const initSocket = (io) => {
 
         if (!isParticipant) {
           // Silently reject — don't reveal existence of chat to unauthorized users
-          console.warn(`[Security] User ${userId} attempted to send to non-member chat ${chatId}`);
+          logger.warn({ userId, chatId }, '[Security] Unauthorized send-message attempt');
           return;
         }
 
@@ -90,7 +91,7 @@ const initSocket = (io) => {
         io.to(chatId).emit('receive-message', message);
       } catch (err) {
         // Swallow errors — don't crash the socket on a bad payload
-        console.warn('[Socket] send-message error:', err.message);
+        logger.warn({ err: err.message }, '[Socket] send-message error');
       }
     });
 
@@ -108,7 +109,7 @@ const initSocket = (io) => {
         userSockets.delete(socket.id);
         if (userSockets.size === 0) onlineUsers.delete(userId); // Last tab closed
       }
-      console.log(`❌ Socket disconnected: userId=${userId}, socketId=${socket.id}`);
+      logger.info({ userId, socketId: socket.id }, 'Socket disconnected');
     });
   });
 };
@@ -129,7 +130,7 @@ const sendNotificationToUser = (userId, notification) => {
     userSockets.forEach((socketId) => {
       ioInstance.to(socketId).emit('new-notification', notification);
     });
-    console.log(`🔔 Notification emitted to user ${userId} (${userSockets.size} session(s))`);
+    logger.info({ userId, sessions: userSockets.size }, 'Notification emitted');
   }
 };
 
