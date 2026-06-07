@@ -9,16 +9,31 @@ const cloudinary = require('../config/cloudinary');
  */
 const createProduct = async (req, res, next) => {
   try {
-    const { title, description, price, size, condition, images, collegeName, department } = req.body;
+    const { title, description, price, size, condition, collegeName, department } = req.body;
+
+    // Images come from uploadImages middleware → req.cloudinaryUrls
+    // Fallback: if images[] URLs were sent as JSON strings in body
+    const images = req.cloudinaryUrls && req.cloudinaryUrls.length > 0
+      ? req.cloudinaryUrls
+      : req.body.images
+        ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images])
+        : [];
+
+    if (!title || !description || !price || !size || !condition || !collegeName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, description, price, size, condition and college name are required.',
+      });
+    }
 
     const product = await Product.create({
       sellerId: req.user.id,
       title,
       description,
-      price,
+      price: Number(price),
       size,
       condition,
-      images: Array.isArray(images) ? images : [images],
+      images,
       collegeName,
       department,
     });
@@ -147,11 +162,18 @@ const updateProduct = async (req, res, next) => {
       });
     }
 
-    const allowedFields = ['title', 'description', 'price', 'size', 'condition', 'images', 'collegeName', 'department', 'status'];
+    const allowedFields = ['title', 'description', 'price', 'size', 'condition', 'collegeName', 'department', 'status'];
     const updateData = {};
     allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) updateData[field] = req.body[field];
+      if (req.body[field] !== undefined) {
+        updateData[field] = field === 'price' ? Number(req.body[field]) : req.body[field];
+      }
     });
+
+    // If new images were uploaded via multer → Cloudinary, update them
+    if (req.cloudinaryUrls && req.cloudinaryUrls.length > 0) {
+      updateData.images = req.cloudinaryUrls;
+    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,

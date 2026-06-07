@@ -9,22 +9,25 @@ import { SIZES, CONDITIONS, DEPARTMENTS, PRODUCT_TYPES } from '../constants';
 export default function AddProduct() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
   const [imageFiles, setImageFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    if (imageFiles.length === 0) {
-      toast.error('Please upload at least one product image');
-      return;
-    }
+    setLoading(true);
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, val]) => formData.append(key, val));
+      Object.entries(data).forEach(([key, val]) => {
+        if (val !== undefined && val !== '') formData.append(key, val);
+      });
+      // Append image files (optional — product can be listed without photo)
       imageFiles.forEach((file) => formData.append('images', file));
       await createProduct(formData);
-      toast.success('Product listed successfully!');
+      toast.success('Product listed successfully! 🎉');
       navigate('/dashboard/my-products');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create listing');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -134,10 +137,10 @@ export default function AddProduct() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={loading}
           className="btn-primary w-full py-3 text-base"
         >
-          {isSubmitting ? 'Publishing...' : 'Publish Listing'}
+          {loading ? 'Publishing...' : 'Publish Listing'}
         </button>
       </form>
     </div>

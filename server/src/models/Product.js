@@ -33,11 +33,7 @@ const productSchema = new mongoose.Schema({
   },
   images: {
     type: [String],
-    required: [true, 'At least one image is required'],
-    validate: {
-      validator: (arr) => arr.length > 0,
-      message: 'At least one image URL must be provided',
-    },
+    default: [],
   },
   status: {
     type: String,
