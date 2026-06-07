@@ -1,0 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────
+   THEME TOKENS — Light (default)
+───────────────────────────────────────── */
+:root {
+  --bg:           #F9FAFB;
+  --bg-card:      #FFFFFF;
+  --bg-sidebar:   #FFFFFF;
+  --bg-input:     #FFFFFF;
+  --bg-hover:     #F3F4F6;
+  --text:         #111827;
+  --text-muted:   #6B7280;
+  --text-light:   #9CA3AF;
+  --border:       #E5E7EB;
+  --border-light: #F3F4F6;
+  --primary:      #F59E0B;
+  --primary-dark: #D97706;
+  --shadow:       0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ─────────────────────────────────────────
+   THEME TOKENS — Dark
+───────────────────────────────────────── */
+.dark {
+  --bg:           #0F172A;
+  --bg-card:      #1E293B;
+  --bg-sidebar:   #1E293B;
+  --bg-input:     #334155;
+  --bg-hover:     #334155;
+  --text:         #F1F5F9;
+  --text-muted:   #94A3B8;
+  --text-light:   #64748B;
+  --border:       #334155;
+  --border-light: #1E293B;
+  --shadow:       0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg:    0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+}
+
+/* ─────────────────────────────────────────
+   BASE
+───────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* ─────────────────────────────────────────
+   REUSABLE UTILITIES
+───────────────────────────────────────── */
+@layer utilities {
+  .card {
+    background-color: var(--bg-card);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-light);
+    transition: box-shadow 0.2s ease, background-color 0.3s ease;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    background-color: #F59E0B;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    background-color: #D97706;
+    transform: scale(1.02);
+  }
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    background-color: var(--bg-hover);
+    color: var(--text);
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-secondary:hover {
+    background-color: var(--border);
+  }
+
+  .input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    outline: none;
+    background-color: var(--bg-input);
+    font-family: 'Inter', sans-serif;
+  }
+  .input::placeholder {
+    color: var(--text-light);
+  }
+  .input:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px #F59E0B;
+  }
+
+  .badge-available {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+  .badge-sold {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #FEE2E2;
+    color: #991B1B;
+  }
+
+  /* Sidebar & navbar theming */
+  .themed-bg       { background-color: var(--bg); }
+  .themed-card     { background-color: var(--bg-card); }
+  .themed-sidebar  { background-color: var(--bg-sidebar); border-color: var(--border); }
+  .themed-border   { border-color: var(--border); }
+  .themed-text     { color: var(--text); }
+  .themed-muted    { color: var(--text-muted); }
+  .themed-hover:hover { background-color: var(--bg-hover); }
+}
+
+/* ─────────────────────────────────────────
+   SCROLL-DRIVEN ANIMATIONS (CSS-native)
+   Works in Chrome 115+, Edge 115+
+   Falls back gracefully in other browsers
+───────────────────────────────────────── */
+@supports (animation-timeline: view()) {
+  .reveal-up {
+    animation: reveal-up-anim linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 25%;
+  }
+
+  .reveal-left {
+    animation: reveal-left-anim linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 25%;
+  }
+
+  .reveal-right {
+    animation: reveal-right-anim linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 25%;
+  }
+
+  .reveal-scale {
+    animation: reveal-scale-anim linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 20%;
+  }
+}
+
+/* Fallback for non-supporting browsers */
+@supports not (animation-timeline: view()) {
+  .reveal-up,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal-up.in-view,
+  .reveal-left.in-view,
+  .reveal-right.in-view,
+  .reveal-scale.in-view {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes reveal-up-anim {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-left-anim {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-right-anim {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-scale-anim {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Staggered children — add delay via CSS variable */
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 80ms; }
+.stagger > *:nth-child(3) { animation-delay: 160ms; }
+.stagger > *:nth-child(4) { animation-delay: 240ms; }
+.stagger > *:nth-child(5) { animation-delay: 320ms; }
+.stagger > *:nth-child(6) { animation-delay: 400ms; }
+.stagger > *:nth-child(7) { animation-delay: 480ms; }
+.stagger > *:nth-child(8) { animation-delay: 560ms; }
+
+/* Floating hero animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Pulse glow for amber CTA */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+}
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-hover) 25%,
+    var(--border) 50%,
+    var(--bg-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* Dark mode transition for all elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+/* But NOT layout/transform transitions (to avoid stuttering) */
+.btn-primary, .btn-secondary, .card {
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+              color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}

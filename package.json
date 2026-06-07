@@ -1,0 +1,19 @@
+{
+  "name": "college-dress-marketplace",
+  "version": "1.0.0",
+  "description": "A marketplace for college students to buy and sell used uniforms and dresses",
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "start": "concurrently \"npm run start:server\" \"npm run dev:client\"",
+    "start:server": "cd server && npm start"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["college", "marketplace", "dress", "uniform", "MERN"],
+  "author": "",
+  "license": "MIT"
+}
