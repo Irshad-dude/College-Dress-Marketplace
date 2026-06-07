@@ -2,17 +2,24 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 /**
- * Authentication middleware.
- * Reads the JWT from the `Authorization: Bearer <token>` header,
- * verifies it, fetches the user from the database, and attaches
- * a lean user object to `req.user`.
+ * Authentication middleware. (C1 fix applied)
  *
- * Returns 401 if the token is missing, malformed, or invalid.
+ * Token resolution order:
+ *  1. httpOnly cookie `jwt` (set by login/register — XSS-safe)
+ *  2. `Authorization: Bearer <token>` header (fallback for API clients / Socket.IO)
+ *
+ * Verifies the token, fetches user from DB, attaches to req.user.
+ * Returns 401 if token is missing, malformed, expired, or user not found.
  */
 const protect = async (req, res, next) => {
   let token;
 
-  if (
+  // 1. Prefer httpOnly cookie (XSS-safe)
+  if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  // 2. Fallback: Authorization header (for Socket.IO and API clients)
+  else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer ')
   ) {
@@ -27,10 +34,9 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    // Verify the token and decode the payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Fetch the user from DB (excluding password) to ensure account still exists
+    // Fetch user to confirm account still exists
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
@@ -40,7 +46,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // Attach lean user object to request
     req.user = {
       id: user._id.toString(),
       name: user.name,
@@ -57,4 +62,20 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+/**
+ * Role-based access control middleware. (M1 fix)
+ * Usage: protect, requireRole('seller')
+ *
+ * @param {...string} roles - Allowed roles
+ */
+const requireRole = (...roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: `Access denied. Required role: ${roles.join(' or ')}.`,
+    });
+  }
+  next();
+};
+
+module.exports = { protect, requireRole };

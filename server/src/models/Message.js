@@ -22,4 +22,7 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
+// Index for fast message history retrieval per chat (M3 fix)
+messageSchema.index({ chatId: 1, createdAt: 1 });
+
 module.exports = mongoose.model('Message', messageSchema);

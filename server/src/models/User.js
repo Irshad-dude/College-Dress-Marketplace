@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: 8,
+    minlength: 6, // Aligned with auth.validator.js
   },
   role: {
     type: String,

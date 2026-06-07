@@ -23,7 +23,7 @@ export function SocketProvider({ children }) {
         socket.disconnect();
       };
     }
-  }, [token]);
+  }, [token, addNotification]); // M7 fix: include addNotification in deps
 
   return (
     <SocketContext.Provider value={{ socket }}>

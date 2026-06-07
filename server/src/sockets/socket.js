@@ -1,127 +1,141 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Chat = require('../models/Chat');
 
 /**
- * Map of userId (string) -> socketId (string)
- * Used to target real-time events at specific connected users.
+ * H5 fix: Map<userId, Set<socketId>> to support multiple tabs/sessions per user.
+ * Previously Map<userId, socketId> — disconnecting one tab would remove all sessions.
  */
-const onlineUsers = new Map();
+const onlineUsers = new Map(); // userId → Set<socketId>
 
-/** Reference to the Socket.IO server instance (set in initSocket) */
 let ioInstance = null;
 
 /**
- * Initialize Socket.IO with authentication and event handlers.
- *
- * @param {import('socket.io').Server} io - The Socket.IO server instance
+ * Initialize Socket.IO with authentication middleware and event handlers.
+ * @param {import('socket.io').Server} io
  */
 const initSocket = (io) => {
   ioInstance = io;
 
-  // ── Authentication middleware ──────────────────────────────────────────────
-  // Verify JWT on every new connection. Reject the connection if invalid.
+  // ── Auth middleware ──────────────────────────────────────────────────────────
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token;
-
-      if (!token) {
-        return next(new Error('Authentication error: No token provided.'));
-      }
+      if (!token) return next(new Error('Authentication error: No token provided.'));
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id).select('-password');
+      if (!user) return next(new Error('Authentication error: User not found.'));
 
-      if (!user) {
-        return next(new Error('Authentication error: User not found.'));
-      }
-
-      // Attach user info to the socket for use in event handlers
       socket.user = {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
       };
-
       next();
     } catch (err) {
       next(new Error('Authentication error: Invalid or expired token.'));
     }
   });
 
-  // ── Connection handler ─────────────────────────────────────────────────────
+  // ── Connection handler ───────────────────────────────────────────────────────
   io.on('connection', (socket) => {
     const userId = socket.user.id;
     console.log(`🔌 Socket connected: userId=${userId}, socketId=${socket.id}`);
 
-    // Register the user's socket mapping
-    onlineUsers.set(userId, socket.id);
+    // H5: Add to set of sockets for this user (multi-tab support)
+    if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+    onlineUsers.get(userId).add(socket.id);
 
-    // ── Event: join-chat ─────────────────────────────────────────────────────
-    // Client emits this to subscribe to a specific chat room.
+    // ── join-chat ──────────────────────────────────────────────────────────────
     socket.on('join-chat', (chatId) => {
-      if (!chatId) return;
+      if (!chatId || typeof chatId !== 'string') return;
       socket.join(chatId);
-      console.log(`💬 User ${userId} joined chat room: ${chatId}`);
     });
 
-    // ── Event: leave-chat ────────────────────────────────────────────────────
+    // ── leave-chat ─────────────────────────────────────────────────────────────
     socket.on('leave-chat', (chatId) => {
       if (!chatId) return;
       socket.leave(chatId);
-      console.log(`🚪 User ${userId} left chat room: ${chatId}`);
     });
 
-    // ── Event: send-message ──────────────────────────────────────────────────
-    // Broadcasts a new message to all sockets in the chat room.
-    // Payload: { chatId, message } (message object from the DB)
-    socket.on('send-message', (payload) => {
-      if (!payload || !payload.chatId) return;
+    // ── send-message (C2 fix) ──────────────────────────────────────────────────
+    // Validates: payload shape, message size, and chat participation before broadcast.
+    socket.on('send-message', async (payload) => {
+      try {
+        if (!payload || typeof payload !== 'object') return;
 
-      const { chatId, message } = payload;
+        const { chatId, message } = payload;
 
-      // Broadcast to everyone in the room (including sender for confirmation)
-      io.to(chatId).emit('receive-message', message);
-      console.log(`📨 Message broadcast to chat ${chatId} by user ${userId}`);
+        // Validate payload structure
+        if (!chatId || typeof chatId !== 'string') return;
+        if (!message || typeof message !== 'object') return;
+
+        // C2: Verify the emitting user is actually a participant in this chat
+        const chat = await Chat.findById(chatId).lean();
+        if (!chat) return;
+
+        const isParticipant =
+          chat.buyerId.toString() === userId ||
+          chat.sellerId.toString() === userId;
+
+        if (!isParticipant) {
+          // Silently reject — don't reveal existence of chat to unauthorized users
+          console.warn(`[Security] User ${userId} attempted to send to non-member chat ${chatId}`);
+          return;
+        }
+
+        // Broadcast to everyone in the room (including sender for delivery confirmation)
+        io.to(chatId).emit('receive-message', message);
+      } catch (err) {
+        // Swallow errors — don't crash the socket on a bad payload
+        console.warn('[Socket] send-message error:', err.message);
+      }
     });
 
-    // ── Event: typing ────────────────────────────────────────────────────────
-    // Broadcast typing status to the other party in the chat room.
+    // ── typing indicator ───────────────────────────────────────────────────────
     socket.on('typing', ({ chatId, isTyping }) => {
       if (!chatId) return;
       socket.to(chatId).emit('user-typing', { userId, isTyping });
     });
 
-    // ── Event: disconnect ────────────────────────────────────────────────────
+    // ── disconnect ─────────────────────────────────────────────────────────────
     socket.on('disconnect', () => {
-      onlineUsers.delete(userId);
+      // H5: Remove only this socket from the user's set — don't delete all sessions
+      const userSockets = onlineUsers.get(userId);
+      if (userSockets) {
+        userSockets.delete(socket.id);
+        if (userSockets.size === 0) onlineUsers.delete(userId); // Last tab closed
+      }
       console.log(`❌ Socket disconnected: userId=${userId}, socketId=${socket.id}`);
     });
   });
 };
 
 /**
- * Send a real-time 'new-notification' event to a specific user by their userId.
- * If the user is not currently connected, the event is silently skipped.
+ * Send a real-time 'new-notification' event to all active sessions of a user.
+ * Silently skips if user is not connected.
  *
- * @param {string} userId - The target user's MongoDB ObjectId string
- * @param {object} notification - The notification document to emit
+ * @param {string} userId
+ * @param {object} notification
  */
 const sendNotificationToUser = (userId, notification) => {
   if (!ioInstance) return;
 
-  const socketId = onlineUsers.get(userId.toString());
-  if (socketId) {
-    ioInstance.to(socketId).emit('new-notification', notification);
-    console.log(`🔔 Notification emitted to user ${userId}`);
+  const userSockets = onlineUsers.get(userId.toString());
+  if (userSockets && userSockets.size > 0) {
+    // H5: Emit to ALL open tabs/windows of the user
+    userSockets.forEach((socketId) => {
+      ioInstance.to(socketId).emit('new-notification', notification);
+    });
+    console.log(`🔔 Notification emitted to user ${userId} (${userSockets.size} session(s))`);
   }
 };
 
 /**
- * Get the set of currently online user IDs.
- * Useful for presence indicators.
- *
- * @returns {string[]} Array of currently connected user IDs
+ * Returns array of currently online user IDs (at least one active socket).
+ * @returns {string[]}
  */
 const getOnlineUsers = () => Array.from(onlineUsers.keys());
 

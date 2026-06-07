@@ -41,8 +41,8 @@ export default function DashboardLayout() {
   const location = useLocation();
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 

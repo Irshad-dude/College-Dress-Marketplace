@@ -1,14 +1,10 @@
 /**
  * server.js — Entry point for the College Dress Marketplace API
  *
- * Responsibilities:
- *  1. Load environment variables
- *  2. Configure Express with security & parsing middleware
- *  3. Apply rate limiting to auth routes
- *  4. Mount all API routes
- *  5. Register global error handler
- *  6. Create an HTTP server and attach Socket.IO
- *  7. Connect to MongoDB then start listening
+ * Security fixes applied:
+ *  C1 — httpOnly cookie support via cookie-parser
+ *  C4 — NoSQL injection prevention via express-mongo-sanitize
+ *  C5 — Graceful shutdown on uncaughtException (close server before exit)
  */
 
 require('dotenv').config();
@@ -19,34 +15,36 @@ const { Server } = require('socket.io');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');           // C1
+const mongoSanitize = require('express-mongo-sanitize'); // C4
 
 const connectDB = require('./src/config/db');
 const { initSocket } = require('./src/sockets/socket');
 
-// ── Routes ────────────────────────────────────────────────────────────────────
-const authRoutes = require('./src/routes/auth.routes');
-const productRoutes = require('./src/routes/product.routes');
-const chatRoutes = require('./src/routes/chat.routes');
-const messageRoutes = require('./src/routes/message.routes');
+// ── Routes ─────────────────────────────────────────────────────────────────────
+const authRoutes         = require('./src/routes/auth.routes');
+const productRoutes      = require('./src/routes/product.routes');
+const chatRoutes         = require('./src/routes/chat.routes');
+const messageRoutes      = require('./src/routes/message.routes');
 const notificationRoutes = require('./src/routes/notification.routes');
-const uploadRoutes = require('./src/routes/upload.routes');
+const uploadRoutes       = require('./src/routes/upload.routes');
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 const errorHandler = require('./src/middleware/error.middleware');
 
-// ── App setup ─────────────────────────────────────────────────────────────────
+// ── App setup ──────────────────────────────────────────────────────────────────
 const app = express();
 
 // Security headers
 app.use(helmet());
 
-// CORS — allow requests from the frontend dev server
+// CORS — allow requests from the frontend dev server with credentials
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    credentials: true, // Required for httpOnly cookies
   })
 );
 
@@ -54,12 +52,23 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ── Rate limiters ──────────────────────────────────────────────────────────────
+// Cookie parser — enables req.cookies for httpOnly JWT (C1)
+app.use(cookieParser());
 
-// Strict limiter for auth endpoints: 5 requests per minute per IP
+// NoSQL injection sanitization — strips $ and . from req.body/params/query (C4)
+app.use(mongoSanitize({
+  replaceWith: '_',
+  onSanitizeError: (req, key) => {
+    console.warn(`[Security] Attempted NoSQL injection on key: ${key}`);
+  },
+}));
+
+// ── Rate limiters ───────────────────────────────────────────────────────────────
+
+// Auth routes: strict limit. Use env var to allow override in dev.
 const authLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 20, // increased for development/testing
+  windowMs: 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 5 : 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -68,7 +77,7 @@ const authLimiter = rateLimit({
   },
 });
 
-// General API limiter: 200 requests per minute per IP
+// General API limiter
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 200,
@@ -83,7 +92,7 @@ const apiLimiter = rateLimit({
 app.use('/api/v1/auth', authLimiter);
 app.use('/api/', apiLimiter);
 
-// ── Health check ──────────────────────────────────────────────────────────────
+// ── Health check ────────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -93,15 +102,15 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ── API Routes ────────────────────────────────────────────────────────────────
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/chats', chatRoutes);
-app.use('/api/v1/messages', messageRoutes);
+// ── API Routes ──────────────────────────────────────────────────────────────────
+app.use('/api/v1/auth',          authRoutes);
+app.use('/api/v1/products',      productRoutes);
+app.use('/api/v1/chats',         chatRoutes);
+app.use('/api/v1/messages',      messageRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
-app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/upload',        uploadRoutes);
 
-// ── 404 handler for unmatched routes ─────────────────────────────────────────
+// ── 404 handler ─────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -109,10 +118,10 @@ app.use((req, res) => {
   });
 });
 
-// ── Global error handler (must be last middleware) ────────────────────────────
+// ── Global error handler ────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ── HTTP Server + Socket.IO ───────────────────────────────────────────────────
+// ── HTTP Server + Socket.IO ─────────────────────────────────────────────────────
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -126,16 +135,14 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 
-// Initialize Socket.IO event handlers and auth middleware
 initSocket(io);
 
-// ── Start server ──────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
+// ── Start server ────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
   try {
     await connectDB();
-
     server.listen(PORT, () => {
       console.log(`\n🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
       console.log(`📡 API available at: http://localhost:${PORT}/api/v1`);
@@ -147,16 +154,23 @@ const startServer = async () => {
   }
 };
 
-// Handle unhandled promise rejections gracefully
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err.message);
-  server.close(() => process.exit(1));
-});
+// ── Graceful shutdown helpers ───────────────────────────────────────────────────
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err.message);
-  process.exit(1);
-});
+const gracefulShutdown = (signal, err) => {
+  if (err) console.error(`[${signal}]`, err.message);
+  console.log(`\n[${signal}] Closing server gracefully...`);
+  server.close(() => {
+    console.log('[Server] HTTP server closed. Exiting.');
+    process.exit(err ? 1 : 0);
+  });
+  // Force exit after 10s if connections don't close
+  setTimeout(() => process.exit(1), 10_000).unref();
+};
+
+// C5 fix — close server BEFORE exiting on uncaught errors
+process.on('unhandledRejection', (err) => gracefulShutdown('unhandledRejection', err));
+process.on('uncaughtException',  (err) => gracefulShutdown('uncaughtException', err));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
 
 startServer();

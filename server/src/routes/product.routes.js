@@ -9,14 +9,14 @@ const {
   markAsSold,
 } = require('../controllers/product.controller');
 const { createInterestNotification } = require('../controllers/notification.controller');
-const { protect } = require('../middleware/auth.middleware');
+const { protect, requireRole } = require('../middleware/auth.middleware');
 const { uploadImages } = require('../middleware/upload.middleware');
 
 // GET  /api/v1/products        — List all products (with filters & pagination)
-// POST /api/v1/products        — Create a new listing (auth + image upload)
+// POST /api/v1/products        — Create a new listing (sellers only)
 router.route('/')
   .get(getProducts)
-  .post(protect, uploadImages, createProduct);
+  .post(protect, requireRole('seller'), uploadImages, createProduct);
 
 // GET    /api/v1/products/:id  — Get single product
 // PUT    /api/v1/products/:id  — Update product (auth, seller only, optional image re-upload)

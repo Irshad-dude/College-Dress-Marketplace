@@ -1,47 +1,45 @@
+/**
+ * AuthContext — C1 Security Fix Applied
+ *
+ * Token strategy:
+ *  - Token is stored in React state (memory) only — never in localStorage.
+ *  - An httpOnly cookie (set by the backend) provides session persistence across refreshes.
+ *  - On app mount: call GET /api/v1/auth/profile — the cookie is sent automatically.
+ *    The backend returns a fresh token which we store in memory for Socket.IO.
+ *  - This makes the token invisible to XSS scripts.
+ */
 import { createContext, useContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import * as authService from '../services/authService';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(null); // In-memory only — for Socket.IO
   const [loading, setLoading] = useState(true);
 
+  // On mount: restore session using the httpOnly cookie (no localStorage needed)
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode(storedToken);
-        if (decoded.exp * 1000 > Date.now()) {
-          setToken(storedToken);
-          authService
-            .getProfile()
-            .then((res) => setUser(res.data.user || res.data))
-            .catch(() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-            })
-            .finally(() => setLoading(false));
-        } else {
-          localStorage.removeItem('token');
-          setLoading(false);
-        }
-      } catch {
-        localStorage.removeItem('token');
-        setLoading(false);
-      }
-    } else {
-      setLoading(false);
-    }
+    authService
+      .getProfile()
+      .then((res) => {
+        const data = res.data;
+        setUser(data.user || data);
+        // Backend now returns a fresh token in getProfile response for Socket.IO use
+        if (data.token) setToken(data.token);
+      })
+      .catch(() => {
+        // Cookie invalid or expired — user needs to log in
+        setUser(null);
+        setToken(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = async (email, password) => {
     const res = await authService.login({ email, password });
     const { token: t, user: u } = res.data;
-    localStorage.setItem('token', t);
-    setToken(t);
+    setToken(t); // Keep in memory only
     setUser(u);
     return u;
   };
@@ -49,15 +47,20 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     const res = await authService.register(data);
     const { token: t, user: u } = res.data;
-    localStorage.setItem('token', t);
     setToken(t);
     setUser(u);
     return u;
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  /**
+   * Logout: clear in-memory state AND call backend to clear the httpOnly cookie.
+   */
+  const logout = async () => {
+    try {
+      await authService.logout(); // Clears httpOnly cookie server-side
+    } catch {
+      // Ignore network errors on logout — clear local state regardless
+    }
     setToken(null);
     setUser(null);
   };

@@ -3,6 +3,7 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true, // C1: Send httpOnly cookie with every request
 });
 
 // Request interceptor: attach token
