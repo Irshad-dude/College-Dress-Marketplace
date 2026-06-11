@@ -87,8 +87,23 @@ const initSocket = (io) => {
           return;
         }
 
-        // Broadcast to everyone in the room (including sender for delivery confirmation)
+        // Broadcast to everyone in the room (sender gets delivery confirmation)
         io.to(chatId).emit('receive-message', message);
+
+        // Also emit DIRECTLY to the recipient's socket(s) in case they haven't
+        // joined the room yet (e.g. they have a different chat open, or there's
+        // a race condition between join-chat and send-message).
+        const recipientId = chat.buyerId.toString() === userId
+          ? chat.sellerId.toString()
+          : chat.buyerId.toString();
+
+        const recipientSockets = onlineUsers.get(recipientId);
+        if (recipientSockets && recipientSockets.size > 0) {
+          recipientSockets.forEach((socketId) => {
+            // tag the chatId so the frontend can filter by active chat
+            ioInstance.to(socketId).emit('receive-message', { ...message, chatId });
+          });
+        }
       } catch (err) {
         // Swallow errors — don't crash the socket on a bad payload
         logger.warn({ err: err.message }, '[Socket] send-message error');
