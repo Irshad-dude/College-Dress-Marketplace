@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   MdDashboard,
   MdInventory2,
@@ -7,6 +7,8 @@ import {
   MdNotifications,
   MdPerson,
   MdLogout,
+  MdHome,
+  MdStorefront,
 } from 'react-icons/md';
 import { GiGraduateCap } from 'react-icons/gi';
 import clsx from 'clsx';
@@ -43,10 +45,8 @@ export default function DashboardLayout() {
   const location  = useLocation();
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
 
-  // L25: Set browser tab title
   usePageTitle(pageTitle);
 
-  // L26: Filter nav links by role — buyers don't see seller-only links
   const navLinks = ALL_NAV_LINKS.filter(
     ({ roles }) => !roles || roles.includes(user?.role)
   );
@@ -67,19 +67,43 @@ export default function DashboardLayout() {
           boxShadow: 'var(--shadow)',
         }}
       >
-        {/* Logo */}
-        <div
-          className="flex items-center gap-2 px-6 py-5"
+        {/* Logo — clicking takes you home */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-6 py-5 hover:opacity-80 transition-opacity"
           style={{ borderBottom: '1px solid var(--border)' }}
+          title="Go to Marketplace"
         >
           <GiGraduateCap className="text-amber-500 text-2xl" />
           <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>
             DressMarket
           </span>
-        </div>
+        </Link>
 
         {/* Nav Links */}
         <nav className="flex-1 py-4 px-3 overflow-y-auto">
+
+          {/* ── Home / Marketplace links (always visible) ── */}
+          <div className="mb-3 pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
+            <Link
+              to="/"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all duration-150 hover:bg-amber-500/10 hover:text-amber-500"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <MdHome className="text-xl flex-shrink-0" />
+              <span>Home</span>
+            </Link>
+            <Link
+              to="/products"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all duration-150 hover:bg-amber-500/10 hover:text-amber-500"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <MdStorefront className="text-xl flex-shrink-0" />
+              <span>Browse Listings</span>
+            </Link>
+          </div>
+
+          {/* ── Dashboard-specific links ── */}
           {navLinks.map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
@@ -130,7 +154,19 @@ export default function DashboardLayout() {
             boxShadow: 'var(--shadow)',
           }}
         >
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>{pageTitle}</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>{pageTitle}</h1>
+            {/* Quick home link in topbar */}
+            <Link
+              to="/"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all hover:bg-amber-500 hover:text-white hover:border-amber-500"
+              style={{ color: 'var(--text-muted)', borderColor: 'var(--border)' }}
+              title="Go to Home"
+            >
+              <MdHome className="text-sm" />
+              Home
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             <DarkModeToggle />
             <NotificationBell />
