@@ -77,23 +77,32 @@ app.use(cookieParser());
 app.use(mongoSanitize({ replaceWith: '_' }));
 
 // ── Rate limiters ───────────────────────────────────────────────────────────────
-const authLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: process.env.NODE_ENV === 'production' ? 5 : 20,
+
+// STRICT: Only for login & register — prevents brute-force and credential stuffing
+// ⚠ Must NOT be applied to /profile or /refresh-token (those are called frequently)
+const authStrictLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: process.env.NODE_ENV === 'production' ? 10 : 50,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, message: 'Too many requests. Please try again after a minute.' },
+  skipSuccessfulRequests: false,
+  message: { success: false, message: 'Too many login attempts. Please wait 1 minute and try again.' },
 });
 
+// RELAXED: General API limiter — covers all other endpoints
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 200,
+  max: 500, // Generous — profile fetch on every HMR reload is expected in dev
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests. Please slow down.' },
 });
 
-app.use('/api/v1/auth', authLimiter);
+// Apply strict limiter ONLY to credential endpoints
+app.use('/api/v1/auth/login',    authStrictLimiter);
+app.use('/api/v1/auth/register', authStrictLimiter);
+
+// Apply relaxed limiter to everything else
 app.use('/api/', apiLimiter);
 
 // ── Health check ────────────────────────────────────────────────────────────────

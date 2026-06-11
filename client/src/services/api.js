@@ -3,9 +3,24 @@
  *
  * C1: withCredentials sends httpOnly cookies automatically
  * H6: On 401 with expired:true, auto-call /auth/refresh-token once, then retry
- * M17: On unrecoverable 401, redirect to /login
+ * M17: On unrecoverable 401 from a PROTECTED route, redirect to /login
+ *
+ * ⚠ IMPORTANT: /auth/profile and /auth/refresh-token returning 401 is NORMAL
+ * when the user is not logged in — do NOT redirect to /login in those cases
+ * or it will cause an infinite redirect loop on the login page itself.
  */
 import axios from 'axios';
+
+// Routes that are allowed to return 401 without triggering a redirect
+const SILENT_401_ROUTES = [
+  '/auth/profile',
+  '/auth/refresh-token',
+  '/auth/login',
+  '/auth/register',
+];
+
+const isSilentRoute = (url = '') =>
+  SILENT_401_ROUTES.some((route) => url.includes(route));
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -13,21 +28,19 @@ const api = axios.create({
   withCredentials: true, // C1: Send httpOnly cookies with every request
 });
 
-// ── Request interceptor — attach Bearer token for Socket.IO compatibility ──────
-// The primary auth method is the httpOnly cookie, but we also attach the
-// in-memory token (if available) as Bearer so API clients work too.
+// ── Request interceptor — attach Bearer token if available ────────────────────
 api.interceptors.request.use(
   (config) => {
-    const token = window.__authToken__; // Set by AuthContext after login/register
+    const token = window.__authToken__;
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ── Response interceptor — H6 token refresh + M17 auto-logout ─────────────────
+// ── Response interceptor — token refresh + auto-logout ────────────────────────
 let isRefreshing = false;
-let refreshQueue = []; // Queued requests waiting for token refresh
+let refreshQueue = [];
 
 const processQueue = (error, token = null) => {
   refreshQueue.forEach((cb) => (error ? cb.reject(error) : cb.resolve(token)));
@@ -38,15 +51,16 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest?.url || '';
 
-    // H6: If 401 and token was expired (not missing), try to refresh once
+    // H6: If 401 with expired flag, try refresh-token once (skip for auth routes)
     if (
       error.response?.status === 401 &&
       error.response?.data?.expired === true &&
-      !originalRequest._retried
+      !originalRequest._retried &&
+      !isSilentRoute(requestUrl)
     ) {
       if (isRefreshing) {
-        // Another request is already refreshing — queue this one
         return new Promise((resolve, reject) => {
           refreshQueue.push({ resolve, reject });
         })
@@ -63,26 +77,33 @@ api.interceptors.response.use(
       try {
         const res = await api.post('/auth/refresh-token');
         const newToken = res.data?.token;
-
         if (newToken) {
-          window.__authToken__ = newToken; // Update in-memory token
+          window.__authToken__ = newToken;
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           processQueue(null, newToken);
-          return api(originalRequest); // Retry original request with new token
+          return api(originalRequest);
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Refresh failed — force logout
         window.__authToken__ = null;
-        window.location.href = '/login';
+        // Only redirect if we're not already on an auth page
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // M17: For any other 401 (no token at all), redirect to login
-    if (error.response?.status === 401 && !originalRequest._retried) {
+    // M17: Redirect to /login on 401 from protected routes (not auth routes)
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retried &&
+      !isSilentRoute(requestUrl) &&
+      !window.location.pathname.startsWith('/login') &&
+      !window.location.pathname.startsWith('/register')
+    ) {
       window.__authToken__ = null;
       window.location.href = '/login';
     }

@@ -1,14 +1,13 @@
 /**
- * AuthContext — C1 + H6 + M17 fixes applied
+ * AuthContext — Session management
  *
- * Token strategy:
- *  - Access token (15min): httpOnly 'jwt' cookie for API + window.__authToken__ for Socket.IO
- *  - Refresh token (7d): httpOnly 'refreshToken' cookie only — never exposed to JS
- *  - On app mount: call getProfile() — cookie is sent automatically
- *  - On tab focus (visibilitychange): silently re-verify session (M17)
- *  - Token stored in window.__authToken__ (not localStorage — XSS-safe)
+ * Fixes applied:
+ *  - visibilitychange is DEBOUNCED (5s) so rapid tab switches don't spam /profile
+ *  - restoreSession is called ONCE on mount, not on every re-render
+ *  - Token stored in window.__authToken__ (in-memory, XSS-safe) for Socket.IO
+ *  - No localStorage usage — httpOnly cookie handles persistence
  */
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import * as authService from '../services/authService';
 
@@ -16,45 +15,83 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
-  const [token, setToken]     = useState(null); // In-memory — for Socket.IO auth
+  const [token, setToken]     = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Track whether the initial mount fetch has completed
+  const mountedRef    = useRef(false);
+  // Debounce timer for visibilitychange
+  const visTimerRef   = useRef(null);
+  // Prevent concurrent restoreSession calls
+  const refreshingRef = useRef(false);
 
   /** Store token in both React state AND window global (for Axios interceptor) */
   const storeToken = useCallback((t) => {
     setToken(t);
-    window.__authToken__ = t || null;
+    window.__authToken__ = t ?? null;
   }, []);
 
-  /** Restore session from httpOnly cookie — called on mount and tab focus */
-  const restoreSession = useCallback(async (showExpiredToast = false) => {
-    try {
-      const res = await authService.getProfile();
-      const { user: u, token: t } = res.data;
-      setUser(u);
-      storeToken(t);
-    } catch (err) {
-      if (showExpiredToast && err.response?.status === 401) {
-        toast.warning('Your session has expired. Please log in again.', { toastId: 'session-expired' });
+  /**
+   * Restore session from httpOnly cookie.
+   * Called on mount and (debounced) on tab focus.
+   * @param {boolean} showExpiredToast - show a toast if 401 is received
+   */
+  const restoreSession = useCallback(
+    async (showExpiredToast = false) => {
+      // Prevent parallel calls (e.g. multiple HMR triggers)
+      if (refreshingRef.current) return;
+      refreshingRef.current = true;
+      try {
+        const res  = await authService.getProfile();
+        const data = res.data;
+        setUser(data.user || data);
+        if (data.token) storeToken(data.token);
+      } catch (err) {
+        if (showExpiredToast && err.response?.status === 401) {
+          toast.warning('Your session has expired. Please log in again.', {
+            toastId: 'session-expired', // Prevent duplicate toasts
+          });
+        }
+        setUser(null);
+        storeToken(null);
+      } finally {
+        refreshingRef.current = false;
       }
-      setUser(null);
-      storeToken(null);
-    }
-  }, [storeToken]);
+    },
+    [storeToken]
+  );
 
-  // Mount: restore session from cookie
+  // Mount: restore session from httpOnly cookie (runs once)
   useEffect(() => {
+    if (mountedRef.current) return;
+    mountedRef.current = true;
     restoreSession().finally(() => setLoading(false));
   }, [restoreSession]);
 
-  // M17: On tab refocus, silently verify session is still valid
+  // Debounced visibilitychange — only re-verify if tab was hidden for > 5 seconds
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user) {
-        restoreSession(true); // Show toast if session expired while away
+    let hiddenAt = null;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAt = Date.now();
+        return;
       }
+      // Only refresh if tab was away for more than 5 seconds AND user is logged in
+      if (!user || !hiddenAt || Date.now() - hiddenAt < 5000) return;
+
+      // Debounce: cancel any pending timer and set a new one
+      clearTimeout(visTimerRef.current);
+      visTimerRef.current = setTimeout(() => {
+        restoreSession(true);
+      }, 300);
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearTimeout(visTimerRef.current);
+    };
   }, [user, restoreSession]);
 
   const login = async (email, password) => {
@@ -78,7 +115,7 @@ export function AuthProvider({ children }) {
     try {
       await authService.logout();
     } catch {
-      // Network errors on logout are non-fatal — clear local state regardless
+      // Network errors on logout are non-fatal
     }
     storeToken(null);
     setUser(null);
