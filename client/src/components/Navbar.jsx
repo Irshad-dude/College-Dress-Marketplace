@@ -75,8 +75,8 @@ export default function Navbar() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search dresses, uniforms, lab coats..."
-                className="input pl-10"
+                placeholder="     Search dresses, uniforms, lab coats..."
+                className="input pl-20"
                 style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--border)' }}
               />
             </div>
