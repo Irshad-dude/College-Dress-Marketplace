@@ -41,7 +41,7 @@ export default function Login() {
         <div className="card p-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2 mb-8">
-            <GiGraduateCap className="text-amber-500 text-4xl" />
+            <GiGraduateCap className="text-amber-800 text-4xl" />
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
             <p className="text-gray-500 text-sm">Sign in to your account</p>
           </div>
@@ -73,7 +73,7 @@ export default function Login() {
                 <label className="text-sm font-medium text-gray-700">Password</label>
                 <button
                   type="button"
-                  className="text-xs text-amber-500 hover:text-amber-600 font-medium"
+                  className="text-xs text-amber-800 hover:text-amber-900 font-medium"
                 >
                   Forgot password?
                 </button>
@@ -114,7 +114,7 @@ export default function Login() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-amber-500 font-semibold hover:text-amber-600">
+            <Link to="/register" className="text-amber-800 font-semibold hover:text-amber-900">
               Create one
             </Link>
           </p>

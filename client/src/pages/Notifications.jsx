@@ -64,7 +64,7 @@ export default function Notifications() {
               key={n._id}
               onClick={() => !n.isRead && handleMarkOne(n._id)}
               className={`card p-4 flex items-start gap-4 cursor-pointer transition-colors ${
-                !n.isRead ? 'border-l-4 border-l-amber-500 bg-amber-50/30' : ''
+                !n.isRead ? 'border-l-4 border-l-amber-500 bg-amber-100/30' : ''
               }`}
             >
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${
@@ -78,7 +78,7 @@ export default function Notifications() {
                     {n.title}
                   </p>
                   {!n.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 mt-1.5" />
+                    <span className="w-2 h-2 rounded-full bg-amber-700 flex-shrink-0 mt-1.5" />
                   )}
                 </div>
                 <p className="text-gray-500 text-sm mt-0.5">{n.message}</p>

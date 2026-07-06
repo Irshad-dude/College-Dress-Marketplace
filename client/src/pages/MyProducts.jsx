@@ -142,7 +142,7 @@ export default function MyProducts() {
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 truncate mb-1">{p.title}</h3>
-                <p className="text-amber-500 font-bold mb-1">{formatPrice(p.price)}</p>
+                <p className="text-amber-800 font-bold mb-1">{formatPrice(p.price)}</p>
                 <p className="text-xs text-gray-400 mb-4">{formatDate(p.createdAt)}</p>
                 <div className="flex gap-2">
                   <button

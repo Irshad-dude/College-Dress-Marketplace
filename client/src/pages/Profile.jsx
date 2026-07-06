@@ -101,7 +101,7 @@ export default function Profile() {
               { icon: <MdCalendarToday />, label: 'Member Since', value: formatDate(user.createdAt) },
             ].map(({ icon, label, value, capitalize }) => (
               <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                <span className="text-amber-500 text-lg flex-shrink-0">{icon}</span>
+                <span className="text-amber-800 text-lg flex-shrink-0">{icon}</span>
                 <div>
                   <p className="text-xs text-gray-400">{label}</p>
                   <p className={`font-medium text-gray-800 ${capitalize ? 'capitalize' : ''}`}>{value}</p>
@@ -113,7 +113,7 @@ export default function Profile() {
       </div>
 
       {/* Security note */}
-      <div className="card p-6 bg-amber-50/50 border-amber-100">
+      <div className="card p-6 bg-amber-100/50 border-amber-100">
         <h3 className="font-semibold text-gray-800 mb-2">🔒 Security</h3>
         <p className="text-sm text-gray-500">
           Your account is secured with JWT authentication. Password changes will be available in a future update.

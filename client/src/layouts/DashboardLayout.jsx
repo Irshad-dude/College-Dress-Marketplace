@@ -65,7 +65,7 @@ export default function DashboardLayout() {
         className="flex items-center gap-2 px-6 py-5 hover:opacity-80 transition-opacity"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <GiGraduateCap className="text-amber-500 text-2xl" />
+        <GiGraduateCap className="text-amber-800 text-2xl" />
         <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>DressMarket</span>
       </Link>
 
@@ -75,7 +75,7 @@ export default function DashboardLayout() {
         <div className="mb-3 pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
           <Link
             to="/" onClick={closeSidebar}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-500/10 hover:text-amber-500"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-700/10 hover:text-amber-800"
             style={{ color: 'var(--text-muted)' }}
           >
             <MdHome className="text-xl flex-shrink-0" />
@@ -83,7 +83,7 @@ export default function DashboardLayout() {
           </Link>
           <Link
             to="/products" onClick={closeSidebar}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-500/10 hover:text-amber-500"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-700/10 hover:text-amber-800"
             style={{ color: 'var(--text-muted)' }}
           >
             <MdStorefront className="text-xl flex-shrink-0" />
@@ -104,7 +104,7 @@ export default function DashboardLayout() {
             className={({ isActive }) =>
               clsx(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all',
-                isActive ? 'bg-amber-500/10 text-amber-500' : 'hover:bg-[var(--bg-hover)]'
+                isActive ? 'bg-amber-700/10 text-amber-800' : 'hover:bg-[var(--bg-hover)]'
               )
             }
             style={({ isActive }) => ({ color: isActive ? undefined : 'var(--text-muted)' })}
@@ -112,12 +112,12 @@ export default function DashboardLayout() {
             <Icon className="text-xl flex-shrink-0" />
             <span>{label}</span>
             {label === 'Notifications' && unreadCount > 0 && (
-              <span className="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-auto bg-amber-700 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                 {unreadCount}
               </span>
             )}
             {label === 'Chat' && unreadMsgCount > 0 && (
-              <span className="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-auto bg-amber-700 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                 {unreadMsgCount}
               </span>
             )}
@@ -202,7 +202,7 @@ export default function DashboardLayout() {
             <DarkModeToggle />
             <NotificationBell />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                 {getInitials(user?.name)}
               </div>
               <span className="text-sm font-medium hidden md:block" style={{ color: 'var(--text)' }}>

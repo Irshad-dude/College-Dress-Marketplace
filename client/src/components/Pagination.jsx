@@ -23,7 +23,7 @@ export default function Pagination({ page, pages, onPageChange }) {
           className={clsx(
             'w-9 h-9 rounded-lg text-sm font-medium transition-all',
             p === page
-              ? 'bg-amber-500 text-white shadow-sm'
+              ? 'bg-amber-700 text-white shadow-sm'
               : 'text-gray-600 hover:bg-gray-100'
           )}
         >

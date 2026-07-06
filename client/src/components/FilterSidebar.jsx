@@ -31,7 +31,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
         <h2 className="font-bold text-gray-900">Filters</h2>
         <button
           onClick={clearFilters}
-          className="text-xs text-amber-500 hover:text-amber-600 font-medium"
+          className="text-xs text-amber-800 hover:text-amber-900 font-medium"
         >
           Clear all
         </button>
@@ -68,7 +68,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
               onClick={() => handleSizeToggle(size)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 (filters.sizes || []).includes(size)
-                  ? 'bg-amber-500 text-white border-amber-500'
+                  ? 'bg-amber-700 text-white border-amber-700'
                   : 'bg-white text-gray-600 border-gray-200 hover:border-amber-300'
               }`}
             >
@@ -88,7 +88,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
                 type="checkbox"
                 checked={(filters.conditions || []).includes(condition)}
                 onChange={() => handleConditionToggle(condition)}
-                className="accent-amber-500 w-4 h-4"
+                className="accent-amber-700 w-4 h-4"
               />
               <span className="text-sm text-gray-700">{condition}</span>
             </label>

@@ -25,7 +25,7 @@ export default function ChatWindow({ chat, messages, onSendMessage, currentUserI
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 bg-white flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
           {getInitials(otherUser.name)}
         </div>
         <div>

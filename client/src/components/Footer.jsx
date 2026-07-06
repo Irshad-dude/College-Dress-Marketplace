@@ -9,9 +9,9 @@ export default function Footer() {
           {/* Logo + Tagline */}
           <div className="flex flex-col items-center md:items-start gap-1">
             <div className="flex items-center gap-2">
-              <GiGraduateCap className="text-amber-500 text-2xl" />
+              <GiGraduateCap className="text-amber-800 text-2xl" />
               <span className="font-bold text-gray-900 text-lg">
-                Dress<span className="text-amber-500">Market</span>
+                Dress<span className="text-amber-800">Market</span>
               </span>
             </div>
             <p className="text-sm text-gray-500 italic">Where seniors meet juniors</p>
@@ -19,9 +19,9 @@ export default function Footer() {
 
           {/* Links */}
           <nav className="flex gap-6 text-sm text-gray-600">
-            <Link to="#" className="hover:text-amber-600 transition-colors">About</Link>
-            <Link to="#" className="hover:text-amber-600 transition-colors">Contact</Link>
-            <Link to="#" className="hover:text-amber-600 transition-colors">Privacy</Link>
+            <Link to="#" className="hover:text-amber-900 transition-colors">About</Link>
+            <Link to="#" className="hover:text-amber-900 transition-colors">Contact</Link>
+            <Link to="#" className="hover:text-amber-900 transition-colors">Privacy</Link>
           </nav>
         </div>
 

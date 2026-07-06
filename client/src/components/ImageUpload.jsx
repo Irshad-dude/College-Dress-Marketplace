@@ -57,8 +57,8 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
         <label
           className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ${
             dragging
-              ? 'border-amber-500 bg-amber-50'
-              : 'border-gray-300 bg-gray-50 hover:border-amber-400 hover:bg-amber-50'
+              ? 'border-amber-700 bg-amber-100'
+              : 'border-gray-300 bg-gray-50 hover:border-amber-400 hover:bg-amber-100'
           }`}
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
@@ -66,7 +66,7 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
         >
           <MdCloudUpload className="text-4xl text-gray-300 mb-2" />
           <p className="text-sm text-gray-500">
-            <span className="text-amber-500 font-semibold">Click to upload</span> or drag & drop
+            <span className="text-amber-800 font-semibold">Click to upload</span> or drag & drop
           </p>
           <p className="text-xs text-gray-400 mt-1">
             PNG, JPG, WEBP up to {MAX_SIZE_MB}MB ({previews.length}/{MAX_FILES})

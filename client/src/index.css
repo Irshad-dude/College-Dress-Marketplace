@@ -1,26 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Wix Madefor — same fonts used in the Veilux 'Fashion Store Clean' Wix template */
+@import url('https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700;800&family=Wix+Madefor+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
+
 
 /* ─────────────────────────────────────────
    THEME TOKENS — Light (default)
+   Colors extracted directly from the Wix
+   "Fashion Store Clean" (Veilux) template
+   source code (demone2/veilux):
+     #151414 = near-black (darkest heading)
+     #525150 = warm brown-gray (body text)
+     #767574 = medium warm gray-brown (muted)
+     #a8a6a5 = light warm gray (placeholder)
+     #e0dfdf = border / divider
+     #f1f0ef = light section background
 ───────────────────────────────────────── */
 :root {
-  --bg:           #F9FAFB;
+  --bg:           #F7F4F0;  /* warm off-white page bg — matches Veilux */
   --bg-card:      #FFFFFF;
   --bg-sidebar:   #FFFFFF;
   --bg-input:     #FFFFFF;
-  --bg-hover:     #F3F4F6;
-  --text:         #111827;
-  --text-muted:   #6B7280;
-  --text-light:   #9CA3AF;
-  --border:       #E5E7EB;
-  --border-light: #F3F4F6;
-  --primary:      #F59E0B;
-  --primary-dark: #D97706;
-  --shadow:       0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --bg-hover:     #F1F0EF;  /* Veilux lightest warm tone */
+  --text:         #525150;  /* Veilux primary body text — warm brown-gray */
+  --text-heading: #151414;  /* Veilux heading color — warm near-black */
+  --text-muted:   #767574;  /* Veilux secondary text */
+  --text-light:   #A8A6A5;  /* Veilux placeholder / tertiary */
+  --border:       #E0DFDF;  /* Veilux divider color */
+  --border-light: #F1F0EF;
+  --primary:      #B45309;  /* warm amber-brown accent */
+  --primary-dark: #92400E;
+  --shadow:       0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
   --shadow-lg:    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
+
 
 /* ─────────────────────────────────────────
    THEME TOKENS — Dark
@@ -31,9 +44,10 @@
   --bg-sidebar:   #1E293B;
   --bg-input:     #334155;
   --bg-hover:     #334155;
-  --text:         #F1F5F9;
-  --text-muted:   #94A3B8;
-  --text-light:   #64748B;
+  --text:         #E8E4DF;  /* warm off-white for dark mode body */
+  --text-heading: #F5F1EC;  /* warm near-white for dark mode headings */
+  --text-muted:   #A8A6A5;  /* Veilux light warm-gray, works on dark too */
+  --text-light:   #767574;
   --border:       #334155;
   --border-light: #1E293B;
   --shadow:       0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
@@ -49,10 +63,18 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Inter', sans-serif;
+    /* Wix Madefor Text — same as Veilux template body font */
+    font-family: 'Wix Madefor Text', sans-serif;
     background-color: var(--bg);
     color: var(--text);
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    /* Wix Madefor Display — same as Veilux template heading font */
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-weight: 800;
+    /* Veilux heading color: warm near-black #151414 */
+    color: var(--text-heading, #151414);
   }
   * {
     box-sizing: border-box;
@@ -79,7 +101,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    background-color: #F59E0B;
+    background-color: var(--primary, #B45309);
     color: white;
     font-weight: 600;
     padding: 0.5rem 1.5rem;
@@ -90,7 +112,7 @@
     text-decoration: none;
   }
   .btn-primary:hover {
-    background-color: #D97706;
+    background-color: var(--primary-dark, #92400E);
     transform: scale(1.02);
   }
   .btn-primary:active {
@@ -126,14 +148,14 @@
     transition: all 0.2s ease;
     outline: none;
     background-color: var(--bg-input);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Wix Madefor Text', sans-serif;
   }
   .input::placeholder {
     color: var(--text-light);
   }
   .input:focus {
     border-color: transparent;
-    box-shadow: 0 0 0 2px #F59E0B;
+    box-shadow: 0 0 0 2px var(--primary, #B45309);
   }
 
   .badge-available {

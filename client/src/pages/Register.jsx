@@ -95,7 +95,7 @@ export default function Register() {
         <div className="card p-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2 mb-8">
-            <GiGraduateCap className="text-amber-500 text-4xl" />
+            <GiGraduateCap className="text-amber-800 text-4xl" />
             <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
             <p className="text-gray-500 text-sm">Join thousands of students</p>
           </div>
@@ -196,7 +196,7 @@ export default function Register() {
                     className={clsx(
                       'flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 transition-all',
                       role === r
-                        ? 'border-amber-500 bg-amber-50 text-amber-700'
+                        ? 'border-amber-700 bg-amber-100 text-amber-700'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                     )}
                   >
@@ -223,7 +223,7 @@ export default function Register() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-amber-500 font-semibold hover:text-amber-600">
+            <Link to="/login" className="text-amber-800 font-semibold hover:text-amber-900">
               Sign in
             </Link>
           </p>

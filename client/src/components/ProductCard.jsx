@@ -23,7 +23,7 @@ export default function ProductCard({ product }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-amber-50">
+          <div className="w-full h-full flex items-center justify-center bg-amber-100">
             <span className="text-5xl">👗</span>
           </div>
         )}
@@ -72,7 +72,7 @@ export default function ProductCard({ product }) {
             </span>
           )}
           {condition && (
-            <span className="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded-md font-medium">
+            <span className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-md font-medium">
               {condition}
             </span>
           )}
@@ -80,7 +80,7 @@ export default function ProductCard({ product }) {
 
         {/* Price */}
         <div className="mt-auto pt-2">
-          <p className="text-amber-500 font-bold text-lg">{formatPrice(price)}</p>
+          <p className="text-amber-800 font-bold text-lg">{formatPrice(price)}</p>
         </div>
 
         {/* Seller */}

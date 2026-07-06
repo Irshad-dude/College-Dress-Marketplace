@@ -9,7 +9,7 @@ export default function MessageBubble({ message, isOwn }) {
           className={clsx(
             'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
             isOwn
-              ? 'bg-amber-500 text-white rounded-br-sm'
+              ? 'bg-amber-700 text-white rounded-br-sm'
               : 'bg-white text-gray-900 rounded-bl-sm shadow-sm border border-gray-100'
           )}
         >

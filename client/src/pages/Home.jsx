@@ -1,229 +1,393 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MdSearch, MdTrendingUp, MdPeople, MdSchool, MdArrowForward } from 'react-icons/md';
-import { GiGraduateCap } from 'react-icons/gi';
+import { MdArrowForward, MdSearch } from 'react-icons/md';
 import { getProducts } from '../services/productService';
 import ProductCard from '../components/ProductCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { PRODUCT_TYPES } from '../constants';
 
-const steps = [
-  { icon: '📸', title: 'List Your Dress', desc: 'Take photos and post your college uniform in minutes.' },
-  { icon: '💬', title: 'Connect with Buyers', desc: 'Chat directly with interested juniors. No middlemen.' },
-  { icon: '💰', title: 'Complete the Sale', desc: 'Meet up, hand over the dress, and earn money.' },
+/* ─────────────────────────── Intersection observer hook ─────────────────── */
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.12 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+/* ─────────────────────────── Category data ──────────────────────────────── */
+const CATEGORIES = [
+  { label: 'Uniforms',    emoji: '👔', href: '/products?search=uniform'  },
+  { label: 'Lab Coats',   emoji: '🥼', href: '/products?search=lab+coat' },
+  { label: 'Blazers',     emoji: '🧥', href: '/products?search=blazer'   },
+  { label: 'Sarees',      emoji: '🪭', href: '/products?search=saree'    },
+  { label: 'Kurtas',      emoji: '👘', href: '/products?search=kurta'    },
+  { label: 'Formal Sets', emoji: '👗', href: '/products?search=formal'   },
 ];
 
-const stats = [
-  { icon: <MdTrendingUp />, label: '500+ Listings', color: '#F59E0B' },
-  { icon: <MdPeople />,     label: '200+ Students', color: '#10B981' },
-  { icon: <MdSchool />,     label: '50+ Colleges',  color: '#3B82F6' },
-];
+/* ─────────────────────────── Sub-components ─────────────────────────────── */
+function RevealSection({ children, className = '', delay = 0 }) {
+  const [ref, visible] = useReveal();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(32px)',
+        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
+/* ══════════════════════════ HOME PAGE ══════════════════════════════════════ */
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading,  setLoading]  = useState(true);
+  const [query,    setQuery]    = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     getProducts({ limit: 8, status: 'available' })
-      .then((res) => setProducts(res.data.products || res.data))
+      .then(r => setProducts(r.data.products || r.data || []))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     e.preventDefault();
-    if (searchQuery.trim()) navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    if (query.trim()) navigate(`/products?search=${encodeURIComponent(query.trim())}`);
   };
 
   return (
-    <div style={{ color: 'var(--text)' }}>
+    <div style={{ background: '#FAFAFA', color: '#525150' }}>
 
-      {/* ─── Hero ─── */}
-      <section
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 40%, #FDE68A 80%, #F59E0B 100%)' }}
-      >
-        {/* Decorative blobs */}
-        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full opacity-20 animate-float"
-          style={{ background: 'radial-gradient(circle, #FCD34D, transparent)' }} />
-        <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full opacity-25 animate-float"
-          style={{ background: '#F59E0B', animationDelay: '2s' }} />
+      {/* ══════════════════════════ HERO ══════════════════════════════════════ */}
+      <section style={{ background: '#F7F4F0' }} className="overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-0 min-h-[90vh] items-center">
 
-        <div className="max-w-4xl mx-auto px-4 py-28 text-center relative z-10">
-          {/* Badge */}
-          <div className="reveal-up inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6 shadow-sm">
-            <GiGraduateCap className="text-amber-500 text-lg" />
-            <span className="text-sm font-medium text-amber-700">College Dress Marketplace</span>
-          </div>
+          {/* Left — text */}
+          <div className="py-24 lg:py-0 lg:pr-12 order-2 lg:order-1">
+            <RevealSection delay={0}>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-6">
+                College Dress Marketplace
+              </p>
+            </RevealSection>
 
-          {/* Headline */}
-          <h1 className="reveal-up text-5xl md:text-7xl font-extrabold text-gray-900 mb-4 leading-tight" style={{ animationDelay: '80ms' }}>
-            Buy &amp; Sell<br />
-            <span className="text-amber-600">College Dresses</span>
-          </h1>
+            <RevealSection delay={80}>
+              <h1
+                className="font-black leading-none mb-8"
+                style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '-0.03em', color: '#151414' }}
+              >
+                Dress<br />
+                <span style={{ color: '#B45309' }}>Smart,</span><br />
+                Save More.
+              </h1>
+            </RevealSection>
 
-          <p className="reveal-up text-lg md:text-xl text-gray-600 mb-10 max-w-xl mx-auto" style={{ animationDelay: '160ms' }}>
-            Connect with seniors. Save money. Pass it on.
-          </p>
+            <RevealSection delay={160}>
+              <p className="text-base lg:text-lg text-gray-500 leading-relaxed mb-10 max-w-md">
+                Buy &amp; sell college uniforms, lab coats, and formals directly with
+                students in your campus community. Zero commission, instant chat.
+              </p>
+            </RevealSection>
 
-          {/* Search */}
-          <form
-            onSubmit={handleSearch}
-            className="reveal-up flex max-w-xl mx-auto gap-2 mb-10"
-            style={{ animationDelay: '240ms' }}
-          >
-            <div className="relative flex-1">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search uniforms, lab coats, blazers..."
-                className="input pl-10 shadow-md"
-                style={{ backgroundColor: 'white', color: '#111827' }}
-              />
-            </div>
-            <button type="submit" className="btn-primary shadow-md pulse-glow">
-              Search
-            </button>
-          </form>
+            {/* Search bar */}
+            <RevealSection delay={220}>
+              <form onSubmit={handleSearch} className="flex gap-2 max-w-md mb-10">
+                <div className="relative flex-1">
+                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+                  <input
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    placeholder="Search uniforms, blazers…"
+                    className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95"
+                  style={{ background: '#B45309' }}
+                >
+                  Search
+                </button>
+              </form>
+            </RevealSection>
 
-          {/* CTAs */}
-          <div className="reveal-up flex flex-col sm:flex-row gap-3 justify-center mb-12" style={{ animationDelay: '320ms' }}>
-            <Link to="/products" className="btn-primary text-base px-8 py-3 shadow-lg">
-              Browse Listings
-            </Link>
-            <Link to="/dashboard/add-product" className="btn-secondary text-base px-8 py-3 shadow"
-              style={{ backgroundColor: 'rgba(255,255,255,0.8)', color: '#92400E' }}>
-              Sell Your Dress
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="reveal-up flex flex-wrap justify-center gap-8" style={{ animationDelay: '400ms' }}>
-            {stats.map((s) => (
-              <div key={s.label} className="flex items-center gap-2">
-                <span className="text-2xl" style={{ color: s.color }}>{s.icon}</span>
-                <span className="font-bold text-gray-700">{s.label}</span>
+            <RevealSection delay={280}>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/products"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95"
+                  style={{ background: '#151414' }}
+                >
+                  Shop Now <MdArrowForward />
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold border border-gray-300 hover:border-gray-900 transition-all hover:scale-105 active:scale-95"
+                  style={{ color: '#151414', background: 'white' }}
+                >
+                  Sell a Dress
+                </Link>
               </div>
-            ))}
+            </RevealSection>
+
+            {/* Stats strip */}
+            <RevealSection delay={360}>
+              <div className="flex gap-8 mt-14 pt-8 border-t border-gray-200">
+                {[['500+', 'Listings'], ['200+', 'Students'], ['50+', 'Colleges']].map(([n, l]) => (
+                  <div key={l}>
+                    <p className="text-2xl font-black" style={{ color: '#151414' }}>{n}</p>
+                    <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">{l}</p>
+                  </div>
+                ))}
+              </div>
+            </RevealSection>
+          </div>
+
+          {/* Right — hero image */}
+          <div className="order-1 lg:order-2 relative flex justify-center lg:justify-end">
+            <div
+              className="relative w-full max-w-sm lg:max-w-none"
+              style={{ aspectRatio: '3/4' }}
+            >
+              {/* Background accent */}
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  background: 'linear-gradient(145deg, #F5E6D3 0%, #EDD9C0 100%)',
+                  transform: 'translate(16px, 16px)',
+                }}
+              />
+              <img
+                src="/hero.png"
+                alt="College fashion"
+                className="relative w-full h-full object-cover rounded-3xl shadow-2xl"
+                style={{ objectPosition: 'top center' }}
+              />
+              {/* Floating badge */}
+              <div
+                className="absolute -bottom-4 -left-4 bg-white rounded-2xl px-5 py-3 shadow-xl flex items-center gap-3"
+              >
+                <span className="text-2xl">🎓</span>
+                <div>
+                  <p className="text-xs font-bold text-gray-900">Campus Deals</p>
+                  <p className="text-[11px] text-gray-400">From ₹199 onwards</p>
+                </div>
+              </div>
+              {/* Top badge */}
+              <div
+                className="absolute -top-4 -right-4 bg-amber-800 text-white rounded-2xl px-4 py-2.5 shadow-xl text-center"
+              >
+                <p className="text-xs font-bold">100%</p>
+                <p className="text-[11px] opacity-90">FREE Listing</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
-      <section className="max-w-5xl mx-auto px-4 py-24">
-        <div className="text-center mb-14 reveal-up">
-          <span className="text-amber-500 text-sm font-semibold uppercase tracking-widest">Simple Process</span>
-          <h2 className="text-4xl font-bold mt-2 mb-3" style={{ color: 'var(--text)' }}>How It Works</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Three simple steps to buy or sell</p>
+      {/* ══════════════════════════ MARQUEE STRIP ════════════════════════════ */}
+      <div
+        className="py-4 overflow-hidden"
+        style={{ background: '#151414' }}
+      >
+        <div
+          className="flex gap-12 whitespace-nowrap text-xs font-semibold text-white/60 tracking-widest uppercase"
+          style={{
+            animation: 'marquee 18s linear infinite',
+          }}
+        >
+          {Array(3).fill(['🎓 Free Listings', '⚡ Instant Chat', '🔒 Verified Students', '👗 100+ Categories', '🏫 50+ Colleges', '💰 Save up to 80%']).flat().map((t, i) => (
+            <span key={i} className="flex-shrink-0">{t}</span>
+          ))}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger">
-          {steps.map((step, i) => (
-            <div key={i} className="card p-8 text-center reveal-scale group hover:-translate-y-1 transition-transform duration-300">
-              <div className="text-6xl mb-5 group-hover:scale-110 transition-transform duration-300">{step.icon}</div>
-              <div className="w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center mx-auto mb-4">
-                {i + 1}
-              </div>
-              <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{step.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{step.desc}</p>
+        <style>{`@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-33.33%) } }`}</style>
+      </div>
+
+      {/* ══════════════════════════ CATEGORIES ═══════════════════════════════ */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+        <RevealSection>
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Browse By</p>
+              <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
+                Categories
+              </h2>
             </div>
+            <Link to="/products" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+              All listings <MdArrowForward />
+            </Link>
+          </div>
+        </RevealSection>
+
+        {/* 3-column grid — first card is large (spans 2 rows) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[180px]">
+          {CATEGORIES.map((cat, i) => (
+            <RevealSection key={cat.label} delay={i * 50} className={i === 0 ? 'row-span-2' : ''}>
+              <Link
+                to={cat.href}
+                className="flex flex-col justify-end p-6 h-full rounded-2xl relative overflow-hidden group"
+                style={{
+                  background: i === 0 ? '#151414' : i % 2 === 1 ? '#F7F4F0' : '#FEF3C7',
+                  color: i === 0 ? 'white' : '#151414',
+                }}
+              >
+                <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{cat.emoji}</span>
+                <p className="font-bold text-lg">{cat.label}</p>
+                <p className="text-xs opacity-60 mt-1 flex items-center gap-1">
+                  Shop now <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
+                </p>
+                {/* Hover shimmer */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-white" />
+              </Link>
+            </RevealSection>
           ))}
         </div>
       </section>
 
-      {/* ─── Latest Products ─── */}
-      <section className="py-24" style={{ backgroundColor: 'var(--bg-hover)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-12 reveal-up">
-            <div>
-              <span className="text-amber-500 text-sm font-semibold uppercase tracking-widest">Fresh Arrivals</span>
-              <h2 className="text-4xl font-bold mt-1" style={{ color: 'var(--text)' }}>Latest Listings</h2>
+      {/* ══════════════════════════ LATEST LISTINGS ══════════════════════════ */}
+      <section style={{ background: '#F7F4F0' }} className="py-24">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <RevealSection>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Fresh Arrivals</p>
+                <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
+                  Latest Listings
+                </h2>
+              </div>
+              <Link to="/products" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+                View all <MdArrowForward />
+              </Link>
             </div>
-            <Link
-              to="/products"
-              className="flex items-center gap-1 text-amber-500 font-semibold hover:text-amber-600 transition-colors group"
-            >
-              View All
-              <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+          </RevealSection>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 stagger">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {loading
               ? Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)
-              : products.map((p) => <ProductCard key={p._id} product={p} />)
+              : products.map((p, i) => (
+                  <RevealSection key={p._id} delay={i * 40}>
+                    <ProductCard product={p} />
+                  </RevealSection>
+                ))
             }
           </div>
 
           {!loading && products.length === 0 && (
-            <div className="text-center py-16 reveal-up">
-              <div className="text-6xl mb-4">🎓</div>
-              <p className="text-lg font-medium mb-2" style={{ color: 'var(--text)' }}>No listings yet</p>
-              <p className="mb-6" style={{ color: 'var(--text-muted)' }}>Be the first to list a product!</p>
-              <Link to="/dashboard/add-product" className="btn-primary">Add First Listing</Link>
-            </div>
+            <RevealSection>
+              <div className="text-center py-16">
+                <p className="text-5xl mb-4">🎓</p>
+                <p className="text-lg font-bold mb-2 text-gray-900">No listings yet</p>
+                <p className="text-gray-400 mb-6">Be the first to list a product!</p>
+                <Link to="/dashboard/add-product" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white" style={{ background: '#151414' }}>
+                  Add First Listing <MdArrowForward />
+                </Link>
+              </div>
+            </RevealSection>
           )}
+
+          <div className="text-center mt-10 sm:hidden">
+            <Link to="/products" className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900">
+              View all listings <MdArrowForward />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ─── Categories ─── */}
-      <section className="max-w-5xl mx-auto px-4 py-24">
-        <div className="text-center mb-12 reveal-up">
-          <span className="text-amber-500 text-sm font-semibold uppercase tracking-widest">Categories</span>
-          <h2 className="text-4xl font-bold mt-2 mb-2" style={{ color: 'var(--text)' }}>Browse by Type</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Find exactly what you need</p>
-        </div>
-        <div className="flex flex-wrap gap-3 justify-center stagger">
-          {PRODUCT_TYPES.map((type) => (
-            <Link
-              key={type}
-              to={`/products?type=${encodeURIComponent(type)}`}
-              className="reveal-scale px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105 hover:shadow-md"
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                color: 'var(--text)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#F59E0B';
-                e.currentTarget.style.color = '#D97706';
-                e.currentTarget.style.backgroundColor = '#FFFBEB';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.color = 'var(--text)';
-                e.currentTarget.style.backgroundColor = 'var(--bg-card)';
-              }}
-            >
-              {type}
-            </Link>
+      {/* ══════════════════════════ HOW IT WORKS ═════════════════════════════ */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+        <RevealSection>
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Simple Process</p>
+            <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
+              How It Works
+            </h2>
+          </div>
+        </RevealSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { n: '01', icon: '📸', title: 'List Your Dress', desc: 'Snap a few photos, set a price, and post your college uniform in under 2 minutes.' },
+            { n: '02', icon: '💬', title: 'Connect Directly', desc: 'Chat in real-time with interested buyers. No middlemen, no delays, no fees.' },
+            { n: '03', icon: '💰', title: 'Complete the Deal', desc: 'Meet on campus, hand over the dress, collect your cash. Done.' },
+          ].map((step, i) => (
+            <RevealSection key={step.n} delay={i * 100}>
+              <div
+                className="p-8 rounded-2xl group hover:-translate-y-2 transition-all duration-300"
+                style={{ background: i === 1 ? '#151414' : '#F7F4F0', color: i === 1 ? 'white' : '#151414' }}
+              >
+                <p className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">{step.icon}</p>
+                <p className="text-sm font-bold tracking-widest opacity-40 mb-2">{step.n}</p>
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-sm leading-relaxed opacity-60">{step.desc}</p>
+              </div>
+            </RevealSection>
           ))}
         </div>
       </section>
 
-      {/* ─── CTA Banner ─── */}
+      {/* ══════════════════════════ EDITORIAL BANNER ═════════════════════════ */}
       <section
-        className="py-20 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}
+        className="relative overflow-hidden py-32 px-6"
+        style={{ background: '#B45309' }}
       >
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 50%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="max-w-2xl mx-auto px-4 text-center relative z-10 reveal-up">
-          <h2 className="text-4xl font-bold text-white mb-4">Got a Dress to Sell?</h2>
-          <p className="text-amber-100 mb-10 text-lg">
-            List it for free and connect with students who need it most.
+        {/* Subtle dot grid */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle, white 1.5px, transparent 1.5px)',
+          backgroundSize: '32px 32px',
+        }} />
+        <RevealSection className="relative z-10 max-w-3xl mx-auto text-center text-white">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase opacity-70 mb-5">For Sellers</p>
+          <h2
+            className="font-black leading-none mb-8"
+            style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', letterSpacing: '-0.03em' }}
+          >
+            Got a Dress<br />to Sell?
+          </h2>
+          <p className="text-lg opacity-80 mb-12 max-w-xl mx-auto">
+            List for free. Reach hundreds of students in your college.
+            Turn that old uniform into cash in minutes.
           </p>
           <Link
-            to="/dashboard/add-product"
-            className="inline-flex items-center gap-2 bg-white text-amber-600 font-bold py-4 px-10 rounded-2xl hover:bg-amber-50 transition-all duration-200 hover:scale-105 shadow-xl pulse-glow"
+            to="/register"
+            className="inline-flex items-center gap-3 bg-white px-10 py-4 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95"
+            style={{ color: '#B45309' }}
           >
-            Start Selling <MdArrowForward className="text-xl" />
+            Start Selling Free <MdArrowForward className="text-xl" />
           </Link>
-        </div>
+        </RevealSection>
       </section>
+
+      {/* ══════════════════════════ TRUST STRIP ══════════════════════════════ */}
+      <section style={{ background: '#F7F4F0' }} className="py-16 px-6">
+        <RevealSection className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { icon: '🔒', title: 'Verified Users', desc: 'Only real college students' },
+            { icon: '💬', title: 'Real-time Chat', desc: 'Talk directly, no delays' },
+            { icon: '🚀', title: 'Instant Listing', desc: 'Live in under 2 minutes' },
+            { icon: '₹0', title: 'Zero Commission', desc: 'Keep 100% of your price' },
+          ].map((t, i) => (
+            <div key={t.title}>
+              <div className="text-3xl mb-3">{t.icon}</div>
+              <p className="font-bold text-sm text-gray-900 mb-1">{t.title}</p>
+              <p className="text-xs text-gray-400">{t.desc}</p>
+            </div>
+          ))}
+        </RevealSection>
+      </section>
+
     </div>
   );
 }

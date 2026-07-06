@@ -29,12 +29,12 @@ function ConversationItem({ chat, currentUserId, isActive, onClick, hasUnread })
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 border-b border-gray-100 hover:bg-amber-50 transition-colors relative ${
-        isActive ? 'bg-amber-50 border-l-4 border-l-amber-500' : ''
+      className={`w-full text-left p-4 border-b border-gray-100 hover:bg-amber-100 transition-colors relative ${
+        isActive ? 'bg-amber-100 border-l-4 border-l-amber-500' : ''
       }`}
     >
       {hasUnread && !isActive && (
-        <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-500" />
+        <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-amber-700" />
       )}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center flex-shrink-0 text-sm">
@@ -45,7 +45,7 @@ function ConversationItem({ chat, currentUserId, isActive, onClick, hasUnread })
             {other?.name || 'Unknown'}
           </p>
           <p className="text-xs text-gray-400 truncate">{truncate(product?.title || '', 30)}</p>
-          <p className={`text-xs truncate ${hasUnread && !isActive ? 'text-amber-600 font-medium' : 'text-gray-400'}`}>
+          <p className={`text-xs truncate ${hasUnread && !isActive ? 'text-amber-900 font-medium' : 'text-gray-400'}`}>
             {truncate(chat.lastMessage || 'No messages yet', 35)}
           </p>
         </div>
@@ -329,7 +329,7 @@ export default function Chat() {
             <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
               {loadingMsgs ? (
                 <div className="flex items-center justify-center h-full">
-                  <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full" />
+                  <div className="animate-spin w-6 h-6 border-2 border-amber-700 border-t-transparent rounded-full" />
                 </div>
               ) : messages.length === 0 ? (
                 <p className="text-center text-gray-400 text-sm py-8">No messages yet. Say hello! 👋</p>
@@ -341,7 +341,7 @@ export default function Chat() {
                       <div
                         className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-sm ${
                           mine
-                            ? 'bg-amber-500 text-white rounded-br-sm'
+                            ? 'bg-amber-700 text-white rounded-br-sm'
                             : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                         }`}
                       >

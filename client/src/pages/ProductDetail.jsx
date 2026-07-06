@@ -118,7 +118,7 @@ export default function ProductDetail() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-amber-50">
+              <div className="w-full h-full flex items-center justify-center bg-amber-100">
                 <span className="text-8xl">👗</span>
               </div>
             )}
@@ -129,7 +129,7 @@ export default function ProductDetail() {
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${activeImg === i ? 'border-amber-500 shadow-md' : 'border-transparent'}`}
+                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${activeImg === i ? 'border-amber-700 shadow-md' : 'border-transparent'}`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -146,7 +146,7 @@ export default function ProductDetail() {
           </span>
 
           <h1 className="text-3xl font-bold text-gray-900 mt-3 mb-2">{product.title}</h1>
-          <p className="text-4xl font-extrabold text-amber-500 mb-5">{formatPrice(product.price)}</p>
+          <p className="text-4xl font-extrabold text-amber-800 mb-5">{formatPrice(product.price)}</p>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -165,7 +165,7 @@ export default function ProductDetail() {
 
           {/* College */}
           <div className="flex items-center gap-2 text-gray-600 mb-4">
-            <MdSchool className="text-amber-500 text-xl" />
+            <MdSchool className="text-amber-800 text-xl" />
             <span className="font-medium">{product.collegeName}</span>
           </div>
 

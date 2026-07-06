@@ -68,14 +68,14 @@ export default function Dashboard() {
       <div className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-${isSeller ? 4 : 2} gap-4 mb-8`}>
         {isSeller && (
           <>
-            <StatCard icon={<MdInventory />}    label="Total Listed" value={loading ? '—' : total}  color="bg-amber-50 text-amber-500" />
+            <StatCard icon={<MdInventory />}    label="Total Listed" value={loading ? '—' : total}  color="bg-amber-100 text-amber-800" />
             <StatCard icon={<MdAdd />}           label="Active"       value={loading ? '—' : active} color="bg-green-50 text-green-500" />
             <StatCard icon={<MdCheckCircle />}   label="Sold"         value={loading ? '—' : sold}   color="bg-blue-50 text-blue-500" />
           </>
         )}
         <StatCard icon={<MdNotifications />} label="Unread Notifications" value={unreadCount} color="bg-purple-50 text-purple-500" />
         {!isSeller && (
-          <StatCard icon={<MdShoppingBag />} label="Role" value="Buyer" color="bg-amber-50 text-amber-500" />
+          <StatCard icon={<MdShoppingBag />} label="Role" value="Buyer" color="bg-amber-100 text-amber-800" />
         )}
       </div>
 
@@ -123,7 +123,7 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Recent Listings</h2>
-            <Link to="/dashboard/my-products" className="text-amber-500 text-sm font-medium hover:text-amber-600">
+            <Link to="/dashboard/my-products" className="text-amber-800 text-sm font-medium hover:text-amber-900">
               View all
             </Link>
           </div>
@@ -153,12 +153,12 @@ export default function Dashboard() {
                           {p.images?.[0] ? (
                             <img src={p.images[0]} alt="" loading="lazy" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0 text-lg">👗</div>
+                            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0 text-lg">👗</div>
                           )}
                           <span className="font-medium text-gray-800 truncate max-w-[150px]">{p.title}</span>
                         </div>
                       </td>
-                      <td className="py-3 text-amber-500 font-semibold">{formatPrice(p.price)}</td>
+                      <td className="py-3 text-amber-800 font-semibold">{formatPrice(p.price)}</td>
                       <td className="py-3">
                         <span className={p.status === 'available' ? 'badge-available' : 'badge-sold'}>{p.status}</span>
                       </td>

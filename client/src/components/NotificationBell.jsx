@@ -31,7 +31,7 @@ export default function NotificationBell() {
       >
         <MdNotifications className="text-2xl" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-amber-700 text-white text-xs font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -45,7 +45,7 @@ export default function NotificationBell() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-xs text-amber-500 hover:text-amber-600 font-medium"
+                className="text-xs text-amber-800 hover:text-amber-900 font-medium"
               >
                 Mark all read
               </button>
@@ -66,7 +66,7 @@ export default function NotificationBell() {
             <Link
               to="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs text-amber-500 hover:text-amber-600 font-semibold"
+              className="text-xs text-amber-800 hover:text-amber-900 font-semibold"
             >
               View all notifications →
             </Link>
