@@ -1,200 +1,232 @@
-/**
- * Navbar — Veilux-inspired minimal editorial navbar
- * Transparent on top of hero, fills white on scroll.
- */
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { MdMenu, MdClose, MdPerson, MdDashboard, MdLogout } from 'react-icons/md';
+import { MdSearch, MdClose, MdMenu, MdPerson, MdLogout, MdDashboard, MdHome, MdExplore, MdAdd, MdChat } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import { getInitials } from '../utils/helpers';
-import DarkModeToggle from './DarkModeToggle';
+import clsx from 'clsx';
+
+const NAV_LINKS = [
+  { label: 'SHOP ALL', href: '/products' },
+  { label: 'NEW ARRIVALS', href: '/products?sort=newest' },
+  { label: 'UNIFORMS', href: '/products?search=uniform' },
+  { label: 'BLAZERS', href: '/products?search=blazer' },
+  { label: 'SAREES', href: '/products?search=saree' },
+];
 
 export default function Navbar() {
-  const { user, logout }     = useAuth();
-  const navigate             = useNavigate();
-  const [mobileOpen,   setMobileOpen]   = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [scrolled,     setScrolled]     = useState(false);
-  const dropdownRef = useRef(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Scroll detection — fill background after 40px
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
-        setDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  // Close mobile menu on resize to desktop
-  useEffect(() => {
-    const handler = () => { if (window.innerWidth >= 768) setMobileOpen(false); };
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    setDropdownOpen(false);
-    navigate('/');
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setIsMobileMenuOpen(false);
+    }
   };
 
-  const navLinkCls = 'text-sm font-medium tracking-wide transition-colors hover:text-amber-700';
+  const navLinkStyle = ({ isActive }) => ({
+    color: isActive ? '#E16E50' : '#000000',
+    borderBottom: isActive ? '2px solid #E16E50' : '2px solid transparent',
+  });
+
+  const baseNavLinkClass = "py-1.5 text-xs font-bold tracking-[0.1em] transition-colors hover:text-[#E16E50]";
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 transition-all duration-300"
-        style={{
-          background: scrolled ? 'rgba(250,250,250,0.96)' : '#F7F4F0',
-          backdropFilter: scrolled ? 'blur(10px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
-          boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.06)' : 'none',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between h-16 gap-6">
+      {/* ── Top Announcement Marquee ──────────────────────────────────── */}
+      <div className="hidden md:block w-full bg-black text-white h-8 overflow-hidden relative">
+        <div className="absolute whitespace-nowrap flex items-center h-full animate-marquee">
+          <span className="text-[10px] font-bold tracking-widest px-8">
+            FREE SHIPPING ON ORDERS ABOVE ₹500 • SELL YOUR CLOTHES TODAY • COLLEGE DEALS EVERY WEEK • TRUSTED BY 1000+ STUDENTS •
+            FREE SHIPPING ON ORDERS ABOVE ₹500 • SELL YOUR CLOTHES TODAY • COLLEGE DEALS EVERY WEEK • TRUSTED BY 1000+ STUDENTS •
+            FREE SHIPPING ON ORDERS ABOVE ₹500 • SELL YOUR CLOTHES TODAY • COLLEGE DEALS EVERY WEEK • TRUSTED BY 1000+ STUDENTS
+          </span>
+        </div>
+      </div>
 
-            {/* ── Logo ─────────────────────────────────────────────────────── */}
-            <Link
-              to="/"
-              className="flex-shrink-0 font-black text-xl tracking-tight"
-              style={{ color: '#151414', letterSpacing: '-0.03em' }}
-            >
-              Dress<span style={{ color: '#B45309' }}>Market</span>
+      {/* ── Main Navbar ─────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between h-16">
+            
+            {/* Mobile Menu Button */}
+            <div className="flex md:hidden">
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 -ml-2 text-black"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+              </button>
+            </div>
+
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0 flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+              <span className="font-bold text-2xl tracking-tighter text-black uppercase">
+                Dress<span className="text-black">Market</span>
+              </span>
             </Link>
 
-            {/* ── Desktop Nav Links ─────────────────────────────────────────── */}
-            <nav className="hidden md:flex items-center gap-8">
-              <NavLink to="/products" className={navLinkCls} style={({ isActive }) => ({ color: isActive ? '#B45309' : '#767574' })}>
-                Browse
-              </NavLink>
-              {user && (
-                <NavLink to="/dashboard" className={navLinkCls} style={({ isActive }) => ({ color: isActive ? '#B45309' : '#767574' })}>
-                  Dashboard
+            {/* Desktop Nav Links */}
+            <div className="hidden md:flex flex-1 justify-center gap-8">
+              {NAV_LINKS.map(link => (
+                <NavLink 
+                  key={link.label} 
+                  to={link.href} 
+                  style={navLinkStyle}
+                  className={baseNavLinkClass}
+                >
+                  {link.label}
                 </NavLink>
-              )}
-            </nav>
+              ))}
+            </div>
 
-            {/* ── Right Actions ─────────────────────────────────────────────── */}
-            <div className="flex items-center gap-3">
-              <DarkModeToggle />
+            {/* Right Icons */}
+            <div className="flex items-center gap-2 md:gap-4">
+              <form onSubmit={handleSearch} className="hidden md:flex relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-48 xl:w-64 border-b border-black py-1 pl-2 pr-8 text-xs focus:outline-none bg-transparent placeholder-gray-400"
+                />
+                <button type="submit" className="absolute right-1 top-1/2 -translate-y-1/2 text-black hover:text-[#E16E50] transition-colors">
+                  <MdSearch size={18} />
+                </button>
+              </form>
 
               {user ? (
-                /* ── User avatar + dropdown ── */
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setDropdownOpen(p => !p)}
-                    className="flex items-center gap-2 rounded-xl px-3 py-1.5 transition-colors hover:bg-black/5"
-                    aria-label="User menu"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-amber-800 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                      {getInitials(user.name)}
-                    </div>
-                    <span className="text-sm font-medium hidden lg:block" style={{ color: '#151414' }}>
-                      {user.name?.split(' ')[0]}
-                    </span>
-                  </button>
-
-                  {dropdownOpen && (
-                    <div
-                      className="absolute right-0 mt-2 w-48 rounded-xl py-1 z-50"
-                      style={{
-                        background: 'white',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                      }}
+                <>
+                  <NotificationBell />
+                  
+                  <div className="relative hidden md:block">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+                      className="flex items-center gap-2 p-1 border border-black hover:bg-gray-50 transition-colors"
                     >
-                      <Link to="/dashboard/profile" onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        <MdPerson /> Profile
-                      </Link>
-                      <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        <MdDashboard /> Dashboard
-                      </Link>
-                      <hr className="my-1 border-gray-100" />
-                      <button onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 w-full text-left transition-colors">
-                        <MdLogout /> Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
+                      <div className="w-6 h-6 bg-black flex items-center justify-center text-white text-[10px] font-bold">
+                        {getInitials(user.name)}
+                      </div>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg py-1 text-sm font-medium z-50">
+                        <div className="px-4 py-2 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider truncate">
+                          {user.email}
+                        </div>
+                        <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2.5 text-black hover:bg-gray-50 transition-colors uppercase tracking-wide text-xs">
+                          <MdDashboard size={16} /> Dashboard
+                        </Link>
+                        <Link to="/dashboard/profile" className="flex items-center gap-2 px-4 py-2.5 text-black hover:bg-gray-50 transition-colors uppercase tracking-wide text-xs">
+                          <MdPerson size={16} /> Profile
+                        </Link>
+                        <div className="h-px bg-gray-100 my-1" />
+                        <button
+                          onClick={() => logout()}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-black hover:bg-gray-50 transition-colors uppercase tracking-wide text-xs text-left"
+                        >
+                          <MdLogout size={16} /> Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
-                /* ── Guest CTAs ── */
-                <div className="hidden md:flex items-center gap-2">
-                  <Link to="/login"
-                    className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors hover:bg-black/5"
-                    style={{ color: '#767574' }}>
+                <div className="hidden md:flex items-center gap-4">
+                  <Link to="/login" className="text-xs font-bold uppercase tracking-widest text-black hover:text-[#E16E50] transition-colors">
                     Login
-                  </Link>
-                  <Link to="/register"
-                    className="text-sm font-semibold px-5 py-2 rounded-xl text-white transition-all hover:scale-105 active:scale-95"
-                    style={{ background: '#151414' }}>
-                    Sign Up
                   </Link>
                 </div>
               )}
-
-              {/* Hamburger — mobile only */}
-              <button
-                className="md:hidden p-2 rounded-lg hover:bg-black/5 transition-colors"
-                style={{ color: '#151414' }}
-                onClick={() => setMobileOpen(p => !p)}
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              >
-                {mobileOpen ? <MdClose className="text-2xl" /> : <MdMenu className="text-2xl" />}
-              </button>
             </div>
           </div>
         </div>
 
-        {/* ── Mobile Menu ──────────────────────────────────────────────────── */}
-        <div
-          className="md:hidden overflow-hidden transition-all duration-300"
-          style={{ maxHeight: mobileOpen ? '300px' : '0', opacity: mobileOpen ? 1 : 0 }}
-        >
-          <div className="px-6 pb-6 pt-2 space-y-2 border-t border-gray-100">
-            <Link to="/products" onClick={() => setMobileOpen(false)}
-              className="block py-3 text-sm font-semibold border-b border-gray-100 text-gray-700">
-              Browse Listings
-            </Link>
-            {user ? (
-              <>
-                <Link to="/dashboard" onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-sm font-semibold border-b border-gray-100 text-gray-700">
-                  Dashboard
+        {/* Mobile Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg pb-6 px-4 z-50">
+            <form onSubmit={handleSearch} className="relative mt-4 mb-6">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border-b border-black py-2 pl-2 pr-8 text-sm focus:outline-none bg-transparent placeholder-gray-400"
+              />
+              <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-black">
+                <MdSearch size={20} />
+              </button>
+            </form>
+            <div className="flex flex-col gap-4">
+              {NAV_LINKS.map(link => (
+                <Link 
+                  key={link.label} 
+                  to={link.href}
+                  className="text-sm font-bold uppercase tracking-widest text-black border-b border-gray-100 pb-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
                 </Link>
-                <button onClick={() => { handleLogout(); setMobileOpen(false); }}
-                  className="block py-3 text-sm font-semibold text-red-500 w-full text-left">
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-3 pt-2">
-                <Link to="/login" onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700">
-                  Login
-                </Link>
-                <Link to="/register" onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: '#151414' }}>
-                  Sign Up
-                </Link>
-              </div>
-            )}
+              ))}
+              {!user && (
+                <div className="flex flex-col gap-3 mt-2">
+                  <Link to="/login" className="btn-secondary w-full py-3" onClick={() => setIsMobileMenuOpen(false)}>Login</Link>
+                  <Link to="/register" className="btn-primary w-full py-3" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
+                </div>
+              )}
+            </div>
           </div>
+        )}
+      </nav>
+
+      {/* ── Mobile Bottom Tab Bar ───────────────────────────────────── */}
+      <nav 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 w-full h-[65px] bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] safe-area-bottom pb-2 pt-1" 
+        style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+      >
+        <div className="grid h-full max-w-lg grid-cols-5 mx-auto">
+          
+          <NavLink to="/" className={({ isActive }) => clsx("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors", isActive ? "text-[#E16E50]" : "text-gray-500 hover:text-black")}>
+            <MdHome size={22} />
+            <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
+          </NavLink>
+          
+          <NavLink to="/products" className={({ isActive }) => clsx("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors", isActive ? "text-[#E16E50]" : "text-gray-500 hover:text-black")}>
+            <MdExplore size={22} />
+            <span className="text-[9px] font-bold uppercase tracking-wider">Explore</span>
+          </NavLink>
+
+          <Link to={user ? "/dashboard/add-product" : "/login"} className={clsx("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors", window.location.pathname.includes('add-product') ? "text-[#E16E50]" : "text-gray-500 hover:text-black")}>
+            <div className="bg-black text-white p-1 mb-0.5 rounded-none flex items-center justify-center">
+              <MdAdd size={16} />
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-wider">Sell</span>
+          </Link>
+
+          <NavLink to={user ? "/dashboard/chat" : "/login"} className={({ isActive }) => clsx("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors", isActive ? "text-[#E16E50]" : "text-gray-500 hover:text-black")}>
+            <div className="relative">
+              <MdChat size={22} />
+              {/* Optional unread indicator here */}
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-wider">Chat</span>
+          </NavLink>
+
+          <NavLink to={user ? "/dashboard/profile" : "/login"} className={({ isActive }) => clsx("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors", isActive ? "text-[#E16E50]" : "text-gray-500 hover:text-black")}>
+            <MdPerson size={22} />
+            <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
+          </NavLink>
+
         </div>
-      </header>
+      </nav>
     </>
   );
 }

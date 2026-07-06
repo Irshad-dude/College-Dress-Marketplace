@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MdArrowForward, MdSearch } from 'react-icons/md';
+import { MdArrowForward, MdSchool, MdVerified, MdLocalShipping, MdStar } from 'react-icons/md';
 import { getProducts } from '../services/productService';
 import ProductCard from '../components/ProductCard';
 import SkeletonCard from '../components/SkeletonCard';
@@ -22,17 +22,6 @@ function useReveal() {
   return [ref, visible];
 }
 
-/* ─────────────────────────── Category data ──────────────────────────────── */
-const CATEGORIES = [
-  { label: 'Uniforms',    emoji: '👔', href: '/products?search=uniform'  },
-  { label: 'Lab Coats',   emoji: '🥼', href: '/products?search=lab+coat' },
-  { label: 'Blazers',     emoji: '🧥', href: '/products?search=blazer'   },
-  { label: 'Sarees',      emoji: '🪭', href: '/products?search=saree'    },
-  { label: 'Kurtas',      emoji: '👘', href: '/products?search=kurta'    },
-  { label: 'Formal Sets', emoji: '👗', href: '/products?search=formal'   },
-];
-
-/* ─────────────────────────── Sub-components ─────────────────────────────── */
 function RevealSection({ children, className = '', delay = 0 }) {
   const [ref, visible] = useReveal();
   return (
@@ -50,12 +39,51 @@ function RevealSection({ children, className = '', delay = 0 }) {
   );
 }
 
-/* ══════════════════════════ HOME PAGE ══════════════════════════════════════ */
+/* ─────────────────────────── Category data ──────────────────────────────── */
+const CATEGORIES = [
+  { label: 'Uniforms',    href: '/products?search=uniform', bg: '#F5F5F5', text: '#000' },
+  { label: 'Lab Coats',   href: '/products?search=lab+coat', bg: '#000', text: '#FFF' },
+  { label: 'Blazers',     href: '/products?search=blazer', bg: '#F5F5F5', text: '#000' },
+  { label: 'Sarees',      href: '/products?search=saree', bg: '#000', text: '#FFF' },
+  { label: 'Kurtas',      href: '/products?search=kurta', bg: '#F5F5F5', text: '#000' },
+  { label: 'Formal Sets', href: '/products?search=formal', bg: '#000', text: '#FFF' },
+];
+
+const HERO_SLIDES = [
+  {
+    bg: '#000',
+    title: 'COLLEGE\nFASHION\nMARKETPLACE',
+    buttonText: 'SHOP NOW',
+    textColor: 'text-white',
+    btnClass: 'bg-white text-black hover:bg-gray-200'
+  },
+  {
+    bg: '#F5F5F5',
+    title: 'SELL YOUR\nCLOTHES',
+    buttonText: 'START SELLING',
+    textColor: 'text-black',
+    btnClass: 'bg-[#E16E50] text-white hover:bg-[#D45E3F]'
+  },
+  {
+    bg: '#E16E50',
+    title: 'NEW\nARRIVALS',
+    buttonText: 'BROWSE',
+    textColor: 'text-white',
+    btnClass: 'bg-black text-white hover:bg-gray-900'
+  }
+];
+
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [query,    setQuery]    = useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     getProducts({ limit: 8, status: 'available' })
@@ -64,329 +92,178 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSearch = e => {
-    e.preventDefault();
-    if (query.trim()) navigate(`/products?search=${encodeURIComponent(query.trim())}`);
-  };
-
   return (
-    <div style={{ background: '#FAFAFA', color: '#525150' }}>
-
-      {/* ══════════════════════════ HERO ══════════════════════════════════════ */}
-      <section style={{ background: '#F7F4F0' }} className="overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-0 min-h-[90vh] items-center">
-
-          {/* Left — text */}
-          <div className="py-24 lg:py-0 lg:pr-12 order-2 lg:order-1">
-            <RevealSection delay={0}>
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-6">
-                College Dress Marketplace
-              </p>
-            </RevealSection>
-
-            <RevealSection delay={80}>
-              <h1
-                className="font-black leading-none mb-8"
-                style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '-0.03em', color: '#151414' }}
-              >
-                Dress<br />
-                <span style={{ color: '#B45309' }}>Smart,</span><br />
-                Save More.
+    <div className="flex flex-col min-h-screen bg-white">
+      
+      {/* ── 1. HERO CAROUSEL ────────────────────────────────────────────── */}
+      <section className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden">
+        {HERO_SLIDES.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 flex flex-col justify-center px-6 md:px-16 transition-opacity duration-700 ease-in-out ${
+              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
+            style={{ backgroundColor: slide.bg }}
+          >
+            <div className="max-w-[1500px] w-full mx-auto">
+              <h1 className={`text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-8 ${slide.textColor}`}>
+                {slide.title}
               </h1>
-            </RevealSection>
-
-            <RevealSection delay={160}>
-              <p className="text-base lg:text-lg text-gray-500 leading-relaxed mb-10 max-w-md">
-                Buy &amp; sell college uniforms, lab coats, and formals directly with
-                students in your campus community. Zero commission, instant chat.
-              </p>
-            </RevealSection>
-
-            {/* Search bar */}
-            <RevealSection delay={220}>
-              <form onSubmit={handleSearch} className="flex gap-2 max-w-md mb-10">
-                <div className="relative flex-1">
-                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                  <input
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder="Search uniforms, blazers…"
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95"
-                  style={{ background: '#B45309' }}
-                >
-                  Search
-                </button>
-              </form>
-            </RevealSection>
-
-            <RevealSection delay={280}>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  to="/products"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95"
-                  style={{ background: '#151414' }}
-                >
-                  Shop Now <MdArrowForward />
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold border border-gray-300 hover:border-gray-900 transition-all hover:scale-105 active:scale-95"
-                  style={{ color: '#151414', background: 'white' }}
-                >
-                  Sell a Dress
-                </Link>
-              </div>
-            </RevealSection>
-
-            {/* Stats strip */}
-            <RevealSection delay={360}>
-              <div className="flex gap-8 mt-14 pt-8 border-t border-gray-200">
-                {[['500+', 'Listings'], ['200+', 'Students'], ['50+', 'Colleges']].map(([n, l]) => (
-                  <div key={l}>
-                    <p className="text-2xl font-black" style={{ color: '#151414' }}>{n}</p>
-                    <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">{l}</p>
-                  </div>
-                ))}
-              </div>
-            </RevealSection>
-          </div>
-
-          {/* Right — hero image */}
-          <div className="order-1 lg:order-2 relative flex justify-center lg:justify-end">
-            <div
-              className="relative w-full max-w-sm lg:max-w-none"
-              style={{ aspectRatio: '3/4' }}
-            >
-              {/* Background accent */}
-              <div
-                className="absolute inset-0 rounded-3xl"
-                style={{
-                  background: 'linear-gradient(145deg, #F5E6D3 0%, #EDD9C0 100%)',
-                  transform: 'translate(16px, 16px)',
-                }}
-              />
-              <img
-                src="/hero.png"
-                alt="College fashion"
-                className="relative w-full h-full object-cover rounded-3xl shadow-2xl"
-                style={{ objectPosition: 'top center' }}
-              />
-              {/* Floating badge */}
-              <div
-                className="absolute -bottom-4 -left-4 bg-white rounded-2xl px-5 py-3 shadow-xl flex items-center gap-3"
+              <Link 
+                to="/products"
+                className={`inline-block px-8 py-4 font-bold uppercase tracking-widest text-sm transition-transform hover:scale-105 ${slide.btnClass}`}
               >
-                <span className="text-2xl">🎓</span>
-                <div>
-                  <p className="text-xs font-bold text-gray-900">Campus Deals</p>
-                  <p className="text-[11px] text-gray-400">From ₹199 onwards</p>
-                </div>
-              </div>
-              {/* Top badge */}
-              <div
-                className="absolute -top-4 -right-4 bg-amber-800 text-white rounded-2xl px-4 py-2.5 shadow-xl text-center"
-              >
-                <p className="text-xs font-bold">100%</p>
-                <p className="text-[11px] opacity-90">FREE Listing</p>
-              </div>
+                {slide.buttonText}
+              </Link>
             </div>
           </div>
+        ))}
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-3 z-20">
+          {HERO_SLIDES.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`h-1 transition-all duration-300 ${
+                idx === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/50'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
-      {/* ══════════════════════════ MARQUEE STRIP ════════════════════════════ */}
-      <div
-        className="py-4 overflow-hidden"
-        style={{ background: '#151414' }}
-      >
-        <div
-          className="flex gap-12 whitespace-nowrap text-xs font-semibold text-white/60 tracking-widest uppercase"
-          style={{
-            animation: 'marquee 18s linear infinite',
-          }}
-        >
-          {Array(3).fill(['🎓 Free Listings', '⚡ Instant Chat', '🔒 Verified Students', '👗 100+ Categories', '🏫 50+ Colleges', '💰 Save up to 80%']).flat().map((t, i) => (
-            <span key={i} className="flex-shrink-0">{t}</span>
-          ))}
-        </div>
-        <style>{`@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-33.33%) } }`}</style>
-      </div>
-
-      {/* ══════════════════════════ CATEGORIES ═══════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
-        <RevealSection>
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Browse By</p>
-              <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
-                Categories
-              </h2>
-            </div>
-            <Link to="/products" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
-              All listings <MdArrowForward />
-            </Link>
-          </div>
-        </RevealSection>
-
-        {/* 3-column grid — first card is large (spans 2 rows) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[180px]">
-          {CATEGORIES.map((cat, i) => (
-            <RevealSection key={cat.label} delay={i * 50} className={i === 0 ? 'row-span-2' : ''}>
+      {/* ── 2. CATEGORY STRIP ─────────────────────────────────────────────── */}
+      <RevealSection className="py-16 md:py-24">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
+          <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-gray-400 text-center mb-10">
+            Shop By Category
+          </h2>
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 md:gap-6 pb-4 md:grid md:grid-cols-6 md:overflow-visible md:pb-0">
+            {CATEGORIES.map((cat, i) => (
               <Link
+                key={i}
                 to={cat.href}
-                className="flex flex-col justify-end p-6 h-full rounded-2xl relative overflow-hidden group"
-                style={{
-                  background: i === 0 ? '#151414' : i % 2 === 1 ? '#F7F4F0' : '#FEF3C7',
-                  color: i === 0 ? 'white' : '#151414',
-                }}
+                className="snap-center shrink-0 w-48 md:w-auto aspect-[3/4] flex items-center justify-center p-6 transition-transform hover:scale-105"
+                style={{ backgroundColor: cat.bg }}
               >
-                <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{cat.emoji}</span>
-                <p className="font-bold text-lg">{cat.label}</p>
-                <p className="text-xs opacity-60 mt-1 flex items-center gap-1">
-                  Shop now <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
-                </p>
-                {/* Hover shimmer */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-white" />
+                <span 
+                  className="font-bold uppercase tracking-widest text-lg md:text-xl text-center"
+                  style={{ color: cat.text }}
+                >
+                  {cat.label}
+                </span>
               </Link>
-            </RevealSection>
-          ))}
+            ))}
+          </div>
         </div>
-      </section>
+      </RevealSection>
 
-      {/* ══════════════════════════ LATEST LISTINGS ══════════════════════════ */}
-      <section style={{ background: '#F7F4F0' }} className="py-24">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <RevealSection>
-            <div className="flex items-end justify-between mb-12">
-              <div>
-                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Fresh Arrivals</p>
-                <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
-                  Latest Listings
-                </h2>
-              </div>
-              <Link to="/products" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
-                View all <MdArrowForward />
-              </Link>
-            </div>
-          </RevealSection>
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+      {/* ── 3. TRENDING NOW ──────────────────────────────────────────────── */}
+      <RevealSection className="py-16 bg-white">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold uppercase tracking-tight mb-2">Trending Now</h2>
+            <p className="text-sm text-gray-500 uppercase tracking-widest">Most popular items this week</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {loading
-              ? Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)
-              : products.map((p, i) => (
-                  <RevealSection key={p._id} delay={i * 40}>
-                    <ProductCard product={p} />
-                  </RevealSection>
-                ))
+              ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+              : products.map(product => <ProductCard key={product._id} product={product} />)
             }
           </div>
-
-          {!loading && products.length === 0 && (
-            <RevealSection>
-              <div className="text-center py-16">
-                <p className="text-5xl mb-4">🎓</p>
-                <p className="text-lg font-bold mb-2 text-gray-900">No listings yet</p>
-                <p className="text-gray-400 mb-6">Be the first to list a product!</p>
-                <Link to="/dashboard/add-product" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white" style={{ background: '#151414' }}>
-                  Add First Listing <MdArrowForward />
-                </Link>
-              </div>
-            </RevealSection>
-          )}
-
-          <div className="text-center mt-10 sm:hidden">
-            <Link to="/products" className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900">
-              View all listings <MdArrowForward />
+          
+          <div className="mt-16 text-center">
+            <Link 
+              to="/products"
+              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-[#E16E50] hover:border-[#E16E50] transition-colors"
+            >
+              View All Products <MdArrowForward />
             </Link>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
-      {/* ══════════════════════════ HOW IT WORKS ═════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
-        <RevealSection>
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-[0.25em] uppercase text-amber-900 mb-3">Simple Process</p>
-            <h2 className="text-4xl lg:text-5xl font-black" style={{ letterSpacing: '-0.02em', color: '#151414' }}>
-              How It Works
-            </h2>
-          </div>
-        </RevealSection>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { n: '01', icon: '📸', title: 'List Your Dress', desc: 'Snap a few photos, set a price, and post your college uniform in under 2 minutes.' },
-            { n: '02', icon: '💬', title: 'Connect Directly', desc: 'Chat in real-time with interested buyers. No middlemen, no delays, no fees.' },
-            { n: '03', icon: '💰', title: 'Complete the Deal', desc: 'Meet on campus, hand over the dress, collect your cash. Done.' },
-          ].map((step, i) => (
-            <RevealSection key={step.n} delay={i * 100}>
-              <div
-                className="p-8 rounded-2xl group hover:-translate-y-2 transition-all duration-300"
-                style={{ background: i === 1 ? '#151414' : '#F7F4F0', color: i === 1 ? 'white' : '#151414' }}
-              >
-                <p className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">{step.icon}</p>
-                <p className="text-sm font-bold tracking-widest opacity-40 mb-2">{step.n}</p>
-                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                <p className="text-sm leading-relaxed opacity-60">{step.desc}</p>
+      {/* ── 4. PROMOTIONAL SPLIT ─────────────────────────────────────────── */}
+      <RevealSection className="py-16 md:py-24">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+            {/* Left Col */}
+            <div className="flex-1 bg-black text-white p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+                SELL YOUR<br/>COLLEGE<br/>CLOTHES
+              </h2>
+              <p className="text-gray-400 mb-8 max-w-sm">
+                Turn your old uniforms and lab coats into cash. Join thousands of students already selling on our platform.
+              </p>
+              <div>
+                <Link to="/dashboard/add-product" className="inline-block bg-white text-black font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-200 transition-colors">
+                  List Now &rarr;
+                </Link>
               </div>
-            </RevealSection>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════ EDITORIAL BANNER ═════════════════════════ */}
-      <section
-        className="relative overflow-hidden py-32 px-6"
-        style={{ background: '#B45309' }}
-      >
-        {/* Subtle dot grid */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: 'radial-gradient(circle, white 1.5px, transparent 1.5px)',
-          backgroundSize: '32px 32px',
-        }} />
-        <RevealSection className="relative z-10 max-w-3xl mx-auto text-center text-white">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase opacity-70 mb-5">For Sellers</p>
-          <h2
-            className="font-black leading-none mb-8"
-            style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', letterSpacing: '-0.03em' }}
-          >
-            Got a Dress<br />to Sell?
-          </h2>
-          <p className="text-lg opacity-80 mb-12 max-w-xl mx-auto">
-            List for free. Reach hundreds of students in your college.
-            Turn that old uniform into cash in minutes.
-          </p>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-3 bg-white px-10 py-4 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95"
-            style={{ color: '#B45309' }}
-          >
-            Start Selling Free <MdArrowForward className="text-xl" />
-          </Link>
-        </RevealSection>
-      </section>
-
-      {/* ══════════════════════════ TRUST STRIP ══════════════════════════════ */}
-      <section style={{ background: '#F7F4F0' }} className="py-16 px-6">
-        <RevealSection className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { icon: '🔒', title: 'Verified Users', desc: 'Only real college students' },
-            { icon: '💬', title: 'Real-time Chat', desc: 'Talk directly, no delays' },
-            { icon: '🚀', title: 'Instant Listing', desc: 'Live in under 2 minutes' },
-            { icon: '₹0', title: 'Zero Commission', desc: 'Keep 100% of your price' },
-          ].map((t, i) => (
-            <div key={t.title}>
-              <div className="text-3xl mb-3">{t.icon}</div>
-              <p className="font-bold text-sm text-gray-900 mb-1">{t.title}</p>
-              <p className="text-xs text-gray-400">{t.desc}</p>
             </div>
-          ))}
-        </RevealSection>
-      </section>
+            
+            {/* Right Col */}
+            <div className="flex-1 bg-[#F5F5F5] text-black p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+                FIND YOUR<br/>SIZE
+              </h2>
+              <p className="text-gray-600 mb-8 max-w-sm">
+                From XS to 6XL, we have sizes that fit everyone. Browse our inclusive collection of college wear.
+              </p>
+              <div>
+                <Link to="/products" className="inline-block bg-black text-white font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-800 transition-colors">
+                  Browse &rarr;
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </RevealSection>
+
+      {/* ── 5. TRUST STRIP ──────────────────────────────────────────────── */}
+      <RevealSection className="bg-black py-16">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+            <div className="flex flex-col items-center gap-3">
+              <MdSchool className="text-4xl text-[#E16E50]" />
+              <span className="text-sm font-bold uppercase tracking-widest">1000+ Sellers</span>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <MdStar className="text-4xl text-[#E16E50]" />
+              <span className="text-sm font-bold uppercase tracking-widest">5000+ Products</span>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <MdLocalShipping className="text-4xl text-[#E16E50]" />
+              <span className="text-sm font-bold uppercase tracking-widest">Fast Shipping</span>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <MdVerified className="text-4xl text-[#E16E50]" />
+              <span className="text-sm font-bold uppercase tracking-widest">Verified Users</span>
+            </div>
+          </div>
+        </div>
+      </RevealSection>
+
+      {/* ── 6. NEWSLETTER ────────────────────────────────────────────────── */}
+      <RevealSection className="py-24 bg-white text-center">
+        <div className="max-w-2xl mx-auto px-4">
+          <h2 className="text-4xl font-bold uppercase tracking-tighter mb-4">Join The Community</h2>
+          <p className="text-gray-500 mb-8">Get notified about new listings, exclusive deals, and campus drops.</p>
+          <form className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
+            <input 
+              type="email" 
+              placeholder="ENTER YOUR EMAIL" 
+              className="flex-1 border border-black px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-black uppercase placeholder:normal-case font-bold tracking-wider"
+              required
+            />
+            <button type="submit" className="bg-black text-white px-8 py-3 font-bold uppercase tracking-widest text-sm hover:bg-gray-800 transition-colors">
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </RevealSection>
 
     </div>
   );

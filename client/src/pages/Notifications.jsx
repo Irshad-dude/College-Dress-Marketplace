@@ -4,16 +4,15 @@ import { MdNotifications, MdFavorite, MdChat, MdLocalOffer, MdDoneAll } from 're
 import { toast } from 'react-toastify';
 import { useNotifications } from '../context/NotificationContext';
 import { formatDate } from '../utils/helpers';
-import EmptyState from '../components/EmptyState';
 
 const typeIcons = {
-  interest: <MdFavorite className="text-red-400" />,
-  message: <MdChat className="text-blue-400" />,
-  sold: <MdLocalOffer className="text-green-400" />,
+  interest: <MdFavorite size={20} className="text-[#E16E50]" />,
+  message: <MdChat size={20} className="text-black" />,
+  sold: <MdLocalOffer size={20} className="text-black" />,
 };
 
 export default function Notifications() {
-  usePageTitle('Notifications'); // L25
+  usePageTitle('Notifications');
   const { notifications, unreadCount, fetchNotifications, markAllRead, markOneRead } = useNotifications();
 
   useEffect(() => {
@@ -36,53 +35,57 @@ export default function Notifications() {
   };
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-[800px]">
+      <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-200">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-          <p className="text-gray-500 mt-1">
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
+          <h1 className="text-3xl font-bold uppercase tracking-tighter text-black mb-2">NOTIFICATIONS</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
+            {unreadCount > 0 ? `${unreadCount} UNREAD NOTIFICATIONS` : 'YOU ARE ALL CAUGHT UP'}
           </p>
         </div>
         {unreadCount > 0 && (
-          <button onClick={handleMarkAllRead} className="btn-secondary flex items-center gap-2 text-sm">
-            <MdDoneAll /> Mark all read
+          <button onClick={handleMarkAllRead} className="btn-secondary text-xs flex items-center gap-2">
+            <MdDoneAll size={16} /> MARK ALL READ
           </button>
         )}
       </div>
 
       {notifications.length === 0 ? (
-        <EmptyState
-          icon={<MdNotifications className="text-5xl text-gray-200" />}
-          title="No notifications"
-          message="You'll be notified when buyers show interest or message you"
-        />
+        <div className="border border-black p-16 text-center bg-[#F5F5F5] flex flex-col items-center">
+          <span className="text-6xl opacity-20 mb-6">🔔</span>
+          <h2 className="text-xl font-bold uppercase tracking-tighter text-black mb-2">NO NOTIFICATIONS</h2>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">WE'LL LET YOU KNOW WHEN SOMETHING HAPPENS</p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {notifications.map((n) => (
             <div
               key={n._id}
               onClick={() => !n.isRead && handleMarkOne(n._id)}
-              className={`card p-4 flex items-start gap-4 cursor-pointer transition-colors ${
-                !n.isRead ? 'border-l-4 border-l-amber-500 bg-amber-100/30' : ''
+              className={`p-6 border transition-colors flex items-start gap-6 cursor-pointer ${
+                !n.isRead 
+                  ? 'border-black bg-white shadow-[4px_4px_0_0_#000]' 
+                  : 'border-gray-200 bg-[#F5F5F5]'
               }`}
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${
-                n.type === 'interest' ? 'bg-red-50' : n.type === 'message' ? 'bg-blue-50' : 'bg-green-50'
-              }`}>
-                {typeIcons[n.type] || <MdNotifications className="text-gray-400" />}
+              <div className={`w-12 h-12 border border-black flex items-center justify-center flex-shrink-0 bg-white`}>
+                {typeIcons[n.type] || <MdNotifications size={20} className="text-black" />}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className={`font-semibold text-sm ${!n.isRead ? 'text-gray-900' : 'text-gray-600'}`}>
+              <div className="flex-1 min-w-0 pt-1">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <p className={`text-xs font-bold uppercase tracking-widest ${!n.isRead ? 'text-black' : 'text-gray-500'}`}>
                     {n.title}
                   </p>
                   {!n.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-amber-700 flex-shrink-0 mt-1.5" />
+                    <span className="w-2 h-2 bg-[#E16E50] flex-shrink-0 mt-1" />
                   )}
                 </div>
-                <p className="text-gray-500 text-sm mt-0.5">{n.message}</p>
-                <p className="text-gray-400 text-xs mt-1">{formatDate(n.createdAt)}</p>
+                <p className={`text-sm mb-4 ${!n.isRead ? 'text-black font-medium' : 'text-gray-500'}`}>
+                  {n.message}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  {formatDate(n.createdAt)}
+                </p>
               </div>
             </div>
           ))}

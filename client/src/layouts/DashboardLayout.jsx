@@ -5,32 +5,30 @@ import {
   MdNotifications, MdPerson, MdLogout,
   MdHome, MdStorefront, MdMenu, MdClose,
 } from 'react-icons/md';
-import { GiGraduateCap } from 'react-icons/gi';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useSocket } from '../context/SocketContext';
 import NotificationBell from '../components/NotificationBell';
-import DarkModeToggle from '../components/DarkModeToggle';
 import { getInitials } from '../utils/helpers';
 import usePageTitle from '../hooks/usePageTitle';
 
 const ALL_NAV_LINKS = [
-  { to: '/dashboard',               icon: MdDashboard,     label: 'Dashboard',     roles: null,       end: true },
-  { to: '/dashboard/my-products',   icon: MdInventory2,    label: 'My Products',   roles: ['seller'] },
-  { to: '/dashboard/add-product',   icon: MdAddBox,        label: 'Add Product',   roles: ['seller'] },
-  { to: '/dashboard/chat',          icon: MdChat,          label: 'Chat',          roles: null },
-  { to: '/dashboard/notifications', icon: MdNotifications, label: 'Notifications', roles: null },
-  { to: '/dashboard/profile',       icon: MdPerson,        label: 'Profile',       roles: null },
+  { to: '/dashboard',               icon: MdDashboard,     label: 'DASHBOARD',     roles: null,       end: true },
+  { to: '/dashboard/my-products',   icon: MdInventory2,    label: 'MY PRODUCTS',   roles: ['seller'] },
+  { to: '/dashboard/add-product',   icon: MdAddBox,        label: 'ADD PRODUCT',   roles: ['seller'] },
+  { to: '/dashboard/chat',          icon: MdChat,          label: 'CHAT',          roles: null },
+  { to: '/dashboard/notifications', icon: MdNotifications, label: 'NOTIFICATIONS', roles: null },
+  { to: '/dashboard/profile',       icon: MdPerson,        label: 'PROFILE',       roles: null },
 ];
 
 const pageTitles = {
-  '/dashboard': 'Dashboard',
-  '/dashboard/my-products': 'My Products',
-  '/dashboard/add-product': 'Add Product',
-  '/dashboard/chat': 'Chat',
-  '/dashboard/notifications': 'Notifications',
-  '/dashboard/profile': 'Profile',
+  '/dashboard': 'DASHBOARD',
+  '/dashboard/my-products': 'MY PRODUCTS',
+  '/dashboard/add-product': 'ADD PRODUCT',
+  '/dashboard/chat': 'CHAT',
+  '/dashboard/notifications': 'NOTIFICATIONS',
+  '/dashboard/profile': 'PROFILE',
 };
 
 export default function DashboardLayout() {
@@ -39,7 +37,7 @@ export default function DashboardLayout() {
   const { unreadMsgCount, clearUnreadMsgCount } = useSocket();
   const navigate    = useNavigate();
   const location    = useLocation();
-  const pageTitle   = pageTitles[location.pathname] || 'Dashboard';
+  const pageTitle   = pageTitles[location.pathname] || 'DASHBOARD';
   const [sideOpen, setSideOpen] = useState(false);
 
   usePageTitle(pageTitle);
@@ -55,105 +53,91 @@ export default function DashboardLayout() {
 
   const closeSidebar = () => setSideOpen(false);
 
-  // Shared sidebar content — rendered in both desktop aside and mobile drawer
   const SidebarContent = () => (
     <>
       {/* Logo */}
       <Link
         to="/"
         onClick={closeSidebar}
-        className="flex items-center gap-2 px-6 py-5 hover:opacity-80 transition-opacity"
-        style={{ borderBottom: '1px solid var(--border)' }}
+        className="flex items-center gap-2 px-6 py-6 border-b border-gray-200"
       >
-        <GiGraduateCap className="text-amber-800 text-2xl" />
-        <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>DressMarket</span>
+        <span className="font-bold text-2xl uppercase tracking-tighter text-black">DRESSMARKET</span>
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 px-3 overflow-y-auto">
-        {/* Marketplace shortcuts */}
-        <div className="mb-3 pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
+      <nav className="flex-1 py-6 px-4 overflow-y-auto">
+        <div className="mb-6 pb-6 border-b border-gray-200">
           <Link
             to="/" onClick={closeSidebar}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-700/10 hover:text-amber-800"
-            style={{ color: 'var(--text-muted)' }}
+            className="flex items-center gap-3 px-4 py-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black hover:bg-gray-50 transition-colors"
           >
-            <MdHome className="text-xl flex-shrink-0" />
-            <span>Home</span>
+            <MdHome size={18} /> BACK TO HOME
           </Link>
           <Link
             to="/products" onClick={closeSidebar}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all hover:bg-amber-700/10 hover:text-amber-800"
-            style={{ color: 'var(--text-muted)' }}
+            className="flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black hover:bg-gray-50 transition-colors"
           >
-            <MdStorefront className="text-xl flex-shrink-0" />
-            <span>Browse Listings</span>
+            <MdStorefront size={18} /> BROWSE LISTINGS
           </Link>
         </div>
 
-        {/* Dashboard links */}
-        {navLinks.map(({ to, icon: Icon, label, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            onClick={() => {
-              if (label === 'Chat') clearUnreadMsgCount();
-              closeSidebar();
-            }}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 font-medium text-sm transition-all',
-                isActive ? 'bg-amber-700/10 text-amber-800' : 'hover:bg-[var(--bg-hover)]'
-              )
-            }
-            style={({ isActive }) => ({ color: isActive ? undefined : 'var(--text-muted)' })}
-          >
-            <Icon className="text-xl flex-shrink-0" />
-            <span>{label}</span>
-            {label === 'Notifications' && unreadCount > 0 && (
-              <span className="ml-auto bg-amber-700 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                {unreadCount}
-              </span>
-            )}
-            {label === 'Chat' && unreadMsgCount > 0 && (
-              <span className="ml-auto bg-amber-700 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                {unreadMsgCount}
-              </span>
-            )}
-          </NavLink>
-        ))}
+        <div className="flex flex-col gap-2">
+          {navLinks.map(({ to, icon: Icon, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              onClick={() => {
+                if (label === 'CHAT') clearUnreadMsgCount();
+                closeSidebar();
+              }}
+              className={({ isActive }) =>
+                clsx(
+                  'flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-colors',
+                  isActive ? 'bg-black text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                )
+              }
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+              {label === 'NOTIFICATIONS' && unreadCount > 0 && (
+                <span className="ml-auto bg-[#E16E50] text-white text-[10px] px-2 py-0.5">
+                  {unreadCount}
+                </span>
+              )}
+              {label === 'CHAT' && unreadMsgCount > 0 && (
+                <span className="ml-auto bg-[#E16E50] text-white text-[10px] px-2 py-0.5">
+                  {unreadMsgCount}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       {/* Logout */}
-      <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl font-medium text-sm transition-all hover:bg-red-500/10 hover:text-red-500"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center justify-center gap-2 w-full px-4 py-4 border border-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors text-black"
         >
-          <MdLogout className="text-xl" />
-          <span>Logout</span>
+          <MdLogout size={16} /> LOGOUT
         </button>
       </div>
     </>
   );
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-
+    <div className="flex min-h-screen bg-white">
       {/* ── Desktop sidebar (lg+) ───────────────────────────────────────────── */}
-      <aside
-        className="hidden lg:flex fixed left-0 top-0 h-full w-60 flex-col z-30"
-        style={{ backgroundColor: 'var(--bg-sidebar)', borderRight: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
-      >
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 flex-col z-30 bg-[#F5F5F5] border-r border-gray-200">
         <SidebarContent />
       </aside>
 
       {/* ── Mobile drawer overlay ───────────────────────────────────────────── */}
       {sideOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={closeSidebar}
         />
       )}
@@ -161,51 +145,43 @@ export default function DashboardLayout() {
       {/* ── Mobile drawer panel ─────────────────────────────────────────────── */}
       <aside
         className={clsx(
-          'fixed left-0 top-0 h-full w-72 flex flex-col z-50 lg:hidden transition-transform duration-300',
+          'fixed left-0 top-0 h-full w-[280px] flex flex-col z-50 lg:hidden bg-white transition-transform duration-300',
           sideOpen ? 'translate-x-0' : '-translate-x-full'
         )}
-        style={{ backgroundColor: 'var(--bg-sidebar)', borderRight: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
       >
-        {/* Close button */}
         <button
           onClick={closeSidebar}
-          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100"
-          style={{ color: 'var(--text-muted)' }}
+          className="absolute top-6 right-4 text-black"
         >
-          <MdClose className="text-2xl" />
+          <MdClose size={24} />
         </button>
         <SidebarContent />
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────────────── */}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
-
+      <div className="flex-1 lg:ml-72 flex flex-col min-h-screen bg-white">
+        
         {/* Top bar */}
-        <header
-          className="sticky top-0 z-20 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between"
-          style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
-        >
-          <div className="flex items-center gap-3">
-            {/* Hamburger — mobile only */}
+        <header className="sticky top-0 z-20 px-6 py-4 flex items-center justify-between bg-white border-b border-gray-200">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setSideOpen(true)}
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="Open menu"
+              className="lg:hidden text-black"
             >
-              <MdMenu className="text-2xl" />
+              <MdMenu size={24} />
             </button>
-            <h1 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text)' }}>{pageTitle}</h1>
+            <h1 className="text-lg font-bold uppercase tracking-widest text-black hidden sm:block">
+              {pageTitle}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <DarkModeToggle />
+          <div className="flex items-center gap-4">
             <NotificationBell />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+              <div className="w-8 h-8 bg-black flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                 {getInitials(user?.name)}
               </div>
-              <span className="text-sm font-medium hidden md:block" style={{ color: 'var(--text)' }}>
+              <span className="text-xs font-bold uppercase tracking-widest hidden md:block text-black">
                 {user?.name}
               </span>
             </div>
@@ -213,7 +189,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-6 md:p-10 max-w-[1200px] w-full mx-auto">
           <Outlet />
         </main>
       </div>

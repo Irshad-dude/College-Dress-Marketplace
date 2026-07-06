@@ -7,16 +7,14 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatDate, formatPrice } from '../utils/helpers';
 
-function StatCard({ icon, label, value, color }) {
+function StatCard({ icon, label, value }) {
   return (
-    <div className="card p-6 flex items-center gap-4">
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${color}`}>
-        {icon}
+    <div className="border border-black p-6 flex flex-col justify-between min-h-[140px] bg-white hover:bg-[#F5F5F5] transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">{label}</p>
+        <div className="text-black text-xl">{icon}</div>
       </div>
-      <div>
-        <p className="text-gray-500 text-sm">{label}</p>
-        <p className="text-3xl font-extrabold text-gray-900">{value}</p>
-      </div>
+      <p className="text-4xl font-bold uppercase tracking-tighter text-black">{value}</p>
     </div>
   );
 }
@@ -55,62 +53,59 @@ export default function Dashboard() {
   return (
     <div>
       {/* Welcome */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user?.name?.split(' ')[0]} 👋
+      <div className="mb-10 pb-6 border-b border-gray-200">
+        <h1 className="text-3xl font-bold uppercase tracking-tighter text-black mb-2">
+          WELCOME BACK, {user?.name?.split(' ')[0]}
         </h1>
-        <p className="text-gray-500 mt-1">
-          {isSeller ? "Here's what's happening with your listings" : "Browse and discover college dress listings"}
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+          {isSeller ? "HERE IS WHAT'S HAPPENING WITH YOUR LISTINGS" : "BROWSE AND DISCOVER COLLEGE FASHION"}
         </p>
       </div>
 
-      {/* Stats — seller sees listing stats, buyer sees notification count only */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-${isSeller ? 4 : 2} gap-4 mb-8`}>
+      {/* Stats */}
+      <div className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-${isSeller ? 4 : 2} gap-4 mb-12`}>
         {isSeller && (
           <>
-            <StatCard icon={<MdInventory />}    label="Total Listed" value={loading ? '—' : total}  color="bg-amber-100 text-amber-800" />
-            <StatCard icon={<MdAdd />}           label="Active"       value={loading ? '—' : active} color="bg-green-50 text-green-500" />
-            <StatCard icon={<MdCheckCircle />}   label="Sold"         value={loading ? '—' : sold}   color="bg-blue-50 text-blue-500" />
+            <StatCard icon={<MdInventory />}    label="TOTAL LISTED" value={loading ? '—' : total} />
+            <StatCard icon={<MdAdd />}          label="ACTIVE"       value={loading ? '—' : active} />
+            <StatCard icon={<MdCheckCircle />}  label="SOLD"         value={loading ? '—' : sold} />
           </>
         )}
-        <StatCard icon={<MdNotifications />} label="Unread Notifications" value={unreadCount} color="bg-purple-50 text-purple-500" />
+        <StatCard icon={<MdNotifications />} label="UNREAD NOTIFICATIONS" value={unreadCount} />
         {!isSeller && (
-          <StatCard icon={<MdShoppingBag />} label="Role" value="Buyer" color="bg-amber-100 text-amber-800" />
+          <StatCard icon={<MdShoppingBag />} label="ROLE" value="BUYER" />
         )}
       </div>
 
-      {/* Quick Actions — role-aware */}
-      <div className="card p-6 mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-
-          {/* Seller-only actions */}
+      {/* Quick Actions */}
+      <div className="mb-12">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">QUICK ACTIONS</h2>
+        <div className="flex flex-wrap gap-4">
           {isSeller && (
             <>
-              <Link to="/dashboard/add-product" className="btn-primary flex items-center gap-2">
-                <MdAdd /> Add Product
+              <Link to="/dashboard/add-product" className="btn-primary text-xs flex items-center gap-2 px-6">
+                <MdAdd size={16} /> ADD PRODUCT
               </Link>
-              <Link to="/dashboard/my-products" className="btn-secondary flex items-center gap-2">
-                <MdInventory /> My Products
+              <Link to="/dashboard/my-products" className="btn-secondary text-xs flex items-center gap-2 px-6">
+                <MdInventory size={16} /> MY PRODUCTS
               </Link>
             </>
           )}
 
-          {/* Buyer-only actions */}
           {!isSeller && (
-            <Link to="/products" className="btn-primary flex items-center gap-2">
-              <MdStorefront /> Browse Listings
+            <Link to="/products" className="btn-primary text-xs flex items-center gap-2 px-6">
+              <MdStorefront size={16} /> BROWSE LISTINGS
             </Link>
           )}
 
-          {/* Common actions */}
-          <Link to="/dashboard/chat" className="btn-secondary flex items-center gap-2">
-            <MdChat /> Messages
+          <Link to="/dashboard/chat" className="btn-secondary text-xs flex items-center gap-2 px-6 border-black hover:bg-black hover:text-white">
+            <MdChat size={16} /> MESSAGES
           </Link>
-          <Link to="/dashboard/notifications" className="btn-secondary flex items-center gap-2">
-            <MdNotifications /> Notifications
+          
+          <Link to="/dashboard/notifications" className="btn-secondary text-xs flex items-center gap-2 px-6 border-black hover:bg-black hover:text-white">
+            <MdNotifications size={16} /> NOTIFICATIONS
             {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="ml-2 bg-[#E16E50] text-white text-[10px] px-2 py-0.5">
                 {unreadCount}
               </span>
             )}
@@ -118,68 +113,75 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Listings — sellers only */}
+      {/* Recent Listings (Sellers) */}
       {isSeller && (
-        <div className="card p-6">
+        <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Recent Listings</h2>
-            <Link to="/dashboard/my-products" className="text-amber-800 text-sm font-medium hover:text-amber-900">
-              View all
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">RECENT LISTINGS</h2>
+            <Link to="/dashboard/my-products" className="text-[10px] font-bold uppercase tracking-widest border-b border-black hover:text-[#E16E50] hover:border-[#E16E50] transition-colors pb-0.5">
+              VIEW ALL
             </Link>
           </div>
-          {loading ? (
-            <p className="text-gray-400 text-sm">Loading...</p>
-          ) : myProducts.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-400 mb-4">No products listed yet</p>
-              <Link to="/dashboard/add-product" className="btn-primary">Add Your First Product</Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-400 border-b border-gray-100">
-                    <th className="pb-3 font-medium">Product</th>
-                    <th className="pb-3 font-medium">Price</th>
-                    <th className="pb-3 font-medium">Status</th>
-                    <th className="pb-3 font-medium">Listed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {myProducts.slice(0, 5).map((p) => (
-                    <tr key={p._id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          {p.images?.[0] ? (
-                            <img src={p.images[0]} alt="" loading="lazy" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0 text-lg">👗</div>
-                          )}
-                          <span className="font-medium text-gray-800 truncate max-w-[150px]">{p.title}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-amber-800 font-semibold">{formatPrice(p.price)}</td>
-                      <td className="py-3">
-                        <span className={p.status === 'available' ? 'badge-available' : 'badge-sold'}>{p.status}</span>
-                      </td>
-                      <td className="py-3 text-gray-400">{formatDate(p.createdAt)}</td>
+          
+          <div className="border border-black bg-white">
+            {loading ? (
+              <div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">LOADING...</div>
+            ) : myProducts.length === 0 ? (
+              <div className="p-12 text-center flex flex-col items-center">
+                <span className="text-4xl opacity-20 mb-4">👗</span>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">NO PRODUCTS LISTED YET</p>
+                <Link to="/dashboard/add-product" className="btn-primary text-xs">ADD YOUR FIRST PRODUCT</Link>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-[#F5F5F5]">
+                      <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-gray-500">PRODUCT</th>
+                      <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-gray-500">PRICE</th>
+                      <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-gray-500">STATUS</th>
+                      <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">LISTED</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {myProducts.slice(0, 5).map((p) => (
+                      <tr key={p._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-4">
+                            {p.images?.[0] ? (
+                              <img src={p.images[0]} alt="" loading="lazy" className="w-12 h-16 object-cover bg-gray-100 flex-shrink-0" />
+                            ) : (
+                              <div className="w-12 h-16 bg-[#F5F5F5] flex items-center justify-center text-lg flex-shrink-0">👔</div>
+                            )}
+                            <span className="text-xs font-bold uppercase tracking-widest max-w-[200px] truncate">{p.title}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 text-sm font-bold">{formatPrice(p.price)}</td>
+                        <td className="py-4 px-6">
+                          <span className={p.status === 'available' ? 'badge-available bg-black' : 'badge-sold'}>
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 hidden sm:table-cell">
+                          {formatDate(p.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Buyer-specific: prompt to explore */}
+      {/* Buyer CTA */}
       {!isSeller && (
-        <div className="card p-8 text-center">
-          <MdStorefront className="text-5xl text-amber-400 mx-auto mb-3" />
-          <h2 className="text-lg font-semibold text-gray-800 mb-1">Find Your Perfect College Outfit</h2>
-          <p className="text-gray-500 text-sm mb-4">Browse listings from sellers in your college or department</p>
+        <div className="border border-black p-12 text-center bg-[#F5F5F5]">
+          <h2 className="text-2xl font-bold uppercase tracking-tighter mb-4">FIND YOUR PERFECT COLLEGE OUTFIT</h2>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-8">Browse listings from sellers in your college or department</p>
           <Link to="/products" className="btn-primary inline-flex items-center gap-2">
-            <MdStorefront /> Browse All Listings
+            <MdStorefront size={18} /> BROWSE ALL LISTINGS
           </Link>
         </div>
       )}

@@ -2,13 +2,13 @@ import usePageTitle from '../hooks/usePageTitle';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { MdEdit, MdPerson, MdEmail, MdCalendarToday, MdSchool } from 'react-icons/md';
+import { MdPerson, MdEmail, MdCalendarToday, MdSchool } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../services/authService';
 import { getInitials, formatDate } from '../utils/helpers';
 
 export default function Profile() {
-  usePageTitle('Profile'); // L25
+  usePageTitle('Profile');
   const { user, updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -34,77 +34,76 @@ export default function Profile() {
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-500 mt-1">Manage your account information</p>
+    <div className="max-w-[800px]">
+      <div className="mb-10 pb-6 border-b border-gray-200">
+        <h1 className="text-3xl font-bold uppercase tracking-tighter text-black mb-2">PROFILE</h1>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">MANAGE YOUR ACCOUNT INFO</p>
       </div>
 
-      {/* Avatar card */}
-      <div className="card p-8 mb-6 flex flex-col sm:flex-row items-center gap-6">
-        <div className="w-24 h-24 rounded-full bg-amber-100 text-amber-700 font-extrabold text-3xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+      {/* Avatar Card */}
+      <div className="border border-black p-8 bg-[#F5F5F5] mb-8 flex flex-col sm:flex-row items-center gap-8">
+        <div className="w-32 h-32 bg-black text-white font-bold text-4xl flex items-center justify-center flex-shrink-0">
           {user.profileImage
             ? <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
             : getInitials(user.name)}
         </div>
-        <div className="text-center sm:text-left">
-          <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-          <p className="text-gray-500">{user.email}</p>
-          <span className="inline-flex items-center mt-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 capitalize">
+        <div className="text-center sm:text-left flex-1">
+          <h2 className="text-3xl font-bold uppercase tracking-tighter text-black mb-1">{user.name}</h2>
+          <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">{user.email}</p>
+          <span className="inline-block px-4 py-1 border-2 border-black text-xs font-bold uppercase tracking-widest text-black bg-white">
             {user.role}
           </span>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="card p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-800">Account Information</h3>
+      {/* Info Section */}
+      <div className="border border-black p-8 bg-white mb-8">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-black">ACCOUNT DETAILS</h3>
           {!editing && (
-            <button onClick={() => setEditing(true)} className="btn-secondary text-sm flex items-center gap-1 py-1.5 px-3">
-              <MdEdit size={16} /> Edit
+            <button onClick={() => setEditing(true)} className="text-[10px] font-bold uppercase tracking-widest border-b border-black hover:text-[#E16E50] hover:border-[#E16E50] transition-colors pb-0.5">
+              EDIT PROFILE
             </button>
           )}
         </div>
 
         {editing ? (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <input
                 {...register('name', { required: 'Name is required', minLength: { value: 2, message: 'Min 2 characters' } })}
-                className="input"
+                className="w-full border-b border-black py-3 px-0 text-sm focus:outline-none focus:border-[#E16E50] font-bold tracking-wider transition-colors bg-transparent"
+                placeholder="FULL NAME *"
               />
-              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+              {errors.name && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-2">{errors.name.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image URL</label>
               <input
                 {...register('profileImage')}
-                className="input"
-                placeholder="https://example.com/photo.jpg"
+                className="w-full border-b border-black py-3 px-0 text-sm focus:outline-none focus:border-[#E16E50] font-bold tracking-wider transition-colors bg-transparent"
+                placeholder="PROFILE IMAGE URL (OPTIONAL)"
               />
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-4 pt-4">
               <button type="submit" disabled={saving} className="btn-primary flex-1">
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saving ? 'SAVING...' : 'SAVE CHANGES'}
               </button>
-              <button type="button" onClick={() => setEditing(false)} className="btn-secondary flex-1">Cancel</button>
+              <button type="button" onClick={() => setEditing(false)} className="btn-secondary flex-1">CANCEL</button>
             </div>
           </form>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
             {[
-              { icon: <MdPerson />, label: 'Full Name', value: user.name },
-              { icon: <MdEmail />, label: 'Email', value: user.email },
-              { icon: <MdSchool />, label: 'Role', value: user.role, capitalize: true },
-              { icon: <MdCalendarToday />, label: 'Member Since', value: formatDate(user.createdAt) },
-            ].map(({ icon, label, value, capitalize }) => (
-              <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                <span className="text-amber-800 text-lg flex-shrink-0">{icon}</span>
+              { icon: <MdPerson />, label: 'FULL NAME', value: user.name },
+              { icon: <MdEmail />, label: 'EMAIL', value: user.email },
+              { icon: <MdSchool />, label: 'ROLE', value: user.role },
+              { icon: <MdCalendarToday />, label: 'MEMBER SINCE', value: formatDate(user.createdAt) },
+            ].map(({ icon, label, value }) => (
+              <div key={label} className="flex gap-4">
+                <span className="text-gray-400 mt-1">{icon}</span>
                 <div>
-                  <p className="text-xs text-gray-400">{label}</p>
-                  <p className={`font-medium text-gray-800 ${capitalize ? 'capitalize' : ''}`}>{value}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</p>
+                  <p className="text-sm font-bold uppercase tracking-widest text-black">{value}</p>
                 </div>
               </div>
             ))}
@@ -112,12 +111,12 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Security note */}
-      <div className="card p-6 bg-amber-100/50 border-amber-100">
-        <h3 className="font-semibold text-gray-800 mb-2">🔒 Security</h3>
-        <p className="text-sm text-gray-500">
-          Your account is secured with JWT authentication. Password changes will be available in a future update.
-          If you suspect unauthorized access, please log out from all devices.
+      {/* Security Note */}
+      <div className="border border-black p-8 bg-[#F5F5F5]">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-black mb-4">SECURITY</h3>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-500 leading-relaxed">
+          YOUR ACCOUNT IS SECURED WITH JWT AUTHENTICATION. PASSWORD CHANGES WILL BE AVAILABLE IN A FUTURE UPDATE.
+          IF YOU SUSPECT UNAUTHORIZED ACCESS, PLEASE LOG OUT FROM ALL DEVICES.
         </p>
       </div>
     </div>

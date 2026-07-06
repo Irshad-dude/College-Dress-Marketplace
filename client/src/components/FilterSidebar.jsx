@@ -26,50 +26,51 @@ export default function FilterSidebar({ filters, onFilterChange }) {
   };
 
   return (
-    <aside className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-20">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-bold text-gray-900">Filters</h2>
+    <aside className="sticky top-[80px] bg-white pr-6">
+      <div className="flex items-center justify-between mb-8 pb-4 border-b border-black">
+        <h2 className="font-bold text-lg uppercase tracking-tighter">Filters</h2>
         <button
           onClick={clearFilters}
-          className="text-xs text-amber-800 hover:text-amber-900 font-medium"
+          className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-black border-b border-transparent hover:border-black transition-all"
         >
-          Clear all
+          Clear All
         </button>
       </div>
 
       {/* Price Range */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Price Range (₹)</h3>
-        <div className="flex gap-2">
+      <div className="mb-8">
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Price Range (₹)</h3>
+        <div className="flex items-center gap-4">
           <input
             type="number"
-            placeholder="Min"
+            placeholder="MIN"
             value={filters.minPrice || ''}
             onChange={(e) => handleChange('minPrice', e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full border-b border-gray-300 px-0 py-2 text-sm focus:outline-none focus:border-black uppercase placeholder:normal-case font-bold transition-colors"
           />
+          <span className="text-gray-400 font-bold">-</span>
           <input
             type="number"
-            placeholder="Max"
+            placeholder="MAX"
             value={filters.maxPrice || ''}
             onChange={(e) => handleChange('maxPrice', e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full border-b border-gray-300 px-0 py-2 text-sm focus:outline-none focus:border-black uppercase placeholder:normal-case font-bold transition-colors"
           />
         </div>
       </div>
 
       {/* Size */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Size</h3>
+      <div className="mb-8">
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Size</h3>
         <div className="flex flex-wrap gap-2">
           {SIZES.map((size) => (
             <button
               key={size}
               onClick={() => handleSizeToggle(size)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`min-w-[40px] px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all border ${
                 (filters.sizes || []).includes(size)
-                  ? 'bg-amber-700 text-white border-amber-700'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-amber-300'
+                  ? 'bg-black text-white border-black'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-black hover:text-black'
               }`}
             >
               {size}
@@ -79,18 +80,23 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       </div>
 
       {/* Condition */}
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Condition</h3>
-        <div className="space-y-2">
+      <div className="mb-8">
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Condition</h3>
+        <div className="flex flex-col gap-3">
           {CONDITIONS.map((condition) => (
-            <label key={condition} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={(filters.conditions || []).includes(condition)}
-                onChange={() => handleConditionToggle(condition)}
-                className="accent-amber-700 w-4 h-4"
-              />
-              <span className="text-sm text-gray-700">{condition}</span>
+            <label key={condition} className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center w-5 h-5 border border-gray-300 group-hover:border-black transition-colors">
+                <input
+                  type="checkbox"
+                  checked={(filters.conditions || []).includes(condition)}
+                  onChange={() => handleConditionToggle(condition)}
+                  className="peer absolute w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="hidden peer-checked:block w-3 h-3 bg-black"></div>
+              </div>
+              <span className="text-sm font-medium uppercase tracking-wide text-gray-600 group-hover:text-black transition-colors">
+                {condition}
+              </span>
             </label>
           ))}
         </div>
