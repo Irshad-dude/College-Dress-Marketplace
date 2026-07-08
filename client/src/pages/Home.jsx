@@ -41,18 +41,16 @@ function RevealSection({ children, className = '', delay = 0 }) {
 
 /* ─────────────────────────── Category data ──────────────────────────────── */
 const CATEGORIES = [
-  { label: 'Uniforms',    href: '/products?search=uniform', bg: '#F5F5F5', text: '#000' },
-  { label: 'Lab Coats',   href: '/products?search=lab+coat', bg: '#000', text: '#FFF' },
-  { label: 'Blazers',     href: '/products?search=blazer', bg: '#F5F5F5', text: '#000' },
-  { label: 'Sarees',      href: '/products?search=saree', bg: '#000', text: '#FFF' },
-  { label: 'Kurtas',      href: '/products?search=kurta', bg: '#F5F5F5', text: '#000' },
-  { label: 'Formal Sets', href: '/products?search=formal', bg: '#000', text: '#FFF' },
+  { label: 'Uniforms',    href: '/products?search=uniform', image: '/images/college_uniform.jpg' },
+  { label: 'Lab Coats',   href: '/products?search=lab+coat', image: '/images/lab_coat.jpg' },
+  { label: 'Blazers',     href: '/products?search=blazer', image: '/images/formal_blazer.jpg' },
+  { label: 'Formal Sets', href: '/products?search=formal', image: '/images/formal_set.jpg' },
 ];
 
 const HERO_SLIDES = [
   {
-    bg: '#000',
-    title: 'COLLEGE\nFASHION\nMARKETPLACE',
+    bgImage: '/images/banner.jpg',
+    title: 'ELEVATE YOUR\nCOLLEGE WARDROBE',
     buttonText: 'SHOP NOW',
     textColor: 'text-white',
     btnClass: 'bg-white text-black hover:bg-gray-200'
@@ -100,13 +98,20 @@ export default function Home() {
         {HERO_SLIDES.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 flex flex-col justify-center px-6 md:px-16 transition-opacity duration-700 ease-in-out ${
+            className={`absolute inset-0 flex flex-col justify-center px-6 md:px-16 transition-opacity duration-700 ease-in-out bg-cover bg-center ${
               index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
-            style={{ backgroundColor: slide.bg }}
+            style={{ 
+              backgroundColor: slide.bg, 
+              backgroundImage: slide.bgImage ? `url(${slide.bgImage})` : 'none' 
+            }}
           >
-            <div className="max-w-[1500px] w-full mx-auto">
-              <h1 className={`text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-8 ${slide.textColor}`}>
+            {slide.bgImage && <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>}
+            <div className="max-w-[1500px] w-full mx-auto relative z-10">
+              <h1 
+                key={`title-${currentSlide}`} 
+                className={`text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-8 animate-blur-reveal ${slide.textColor}`}
+              >
                 {slide.title}
               </h1>
               <Link 
@@ -139,18 +144,18 @@ export default function Home() {
           <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-gray-400 text-center mb-10">
             Shop By Category
           </h2>
-          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 md:gap-6 pb-4 md:grid md:grid-cols-6 md:overflow-visible md:pb-0">
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 md:gap-6 pb-4 md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
             {CATEGORIES.map((cat, i) => (
               <Link
                 key={i}
                 to={cat.href}
-                className="snap-center shrink-0 w-48 md:w-auto aspect-[3/4] flex items-center justify-center p-6 transition-transform hover:scale-105"
-                style={{ backgroundColor: cat.bg }}
+                className="relative snap-center shrink-0 w-64 md:w-auto aspect-[3/4] flex items-center justify-center p-6 transition-transform hover:scale-105 overflow-hidden group bg-gray-100"
               >
-                <span 
-                  className="font-bold uppercase tracking-widest text-lg md:text-xl text-center"
-                  style={{ color: cat.text }}
-                >
+                {cat.image && (
+                  <img src={cat.image} alt={cat.label} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                )}
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                <span className="relative z-10 font-bold uppercase tracking-widest text-xl text-white text-center border-2 border-white px-6 py-3 bg-black/30 backdrop-blur-sm">
                   {cat.label}
                 </span>
               </Link>
@@ -191,7 +196,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row gap-4 md:gap-8">
             {/* Left Col */}
             <div className="flex-1 bg-black text-white p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6 animate-blur-reveal">
                 SELL YOUR<br/>COLLEGE<br/>CLOTHES
               </h2>
               <p className="text-gray-400 mb-8 max-w-sm">
@@ -206,7 +211,7 @@ export default function Home() {
             
             {/* Right Col */}
             <div className="flex-1 bg-[#F5F5F5] text-black p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6 animate-blur-reveal" style={{ animationDelay: '200ms' }}>
                 FIND YOUR<br/>SIZE
               </h2>
               <p className="text-gray-600 mb-8 max-w-sm">

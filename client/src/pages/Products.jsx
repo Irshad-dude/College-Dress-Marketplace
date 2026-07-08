@@ -24,7 +24,12 @@ export default function Products() {
   const sort = searchParams.get('sort') || 'newest';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
-  const filters = { size, condition, minPrice, maxPrice };
+  const filters = { 
+    sizes: size ? size.split(',') : [], 
+    conditions: condition ? condition.split(',') : [], 
+    minPrice, 
+    maxPrice 
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -59,9 +64,21 @@ export default function Products() {
     setSearchParams(next);
   };
 
-  const handleFilterChange = (key, val) => {
+  const handleFilterChange = (newFilters) => {
     const next = new URLSearchParams(searchParams);
-    if (val && val.length > 0) next.set(key, val); else next.delete(key);
+    
+    if (newFilters.sizes && newFilters.sizes.length > 0) next.set('size', newFilters.sizes.join(','));
+    else next.delete('size');
+    
+    if (newFilters.conditions && newFilters.conditions.length > 0) next.set('condition', newFilters.conditions.join(','));
+    else next.delete('condition');
+    
+    if (newFilters.minPrice) next.set('minPrice', newFilters.minPrice);
+    else next.delete('minPrice');
+    
+    if (newFilters.maxPrice) next.set('maxPrice', newFilters.maxPrice);
+    else next.delete('maxPrice');
+    
     next.set('page', '1');
     setSearchParams(next);
   };

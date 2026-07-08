@@ -52,6 +52,18 @@ export default function Dashboard() {
 
   return (
     <div>
+      {/* Banner */}
+      <div className="w-full h-48 md:h-64 mb-8 overflow-hidden relative bg-black">
+        <img 
+          src="/images/banner.jpg" 
+          alt="Dashboard Banner" 
+          className="absolute inset-0 w-full h-full object-cover opacity-70"
+        />
+        <div className="absolute inset-0 flex items-end p-8 bg-gradient-to-t from-black/80 to-transparent">
+          <h2 className="text-white text-3xl font-bold uppercase tracking-widest">YOUR DASHBOARD</h2>
+        </div>
+      </div>
+
       {/* Welcome */}
       <div className="mb-10 pb-6 border-b border-gray-200">
         <h1 className="text-3xl font-bold uppercase tracking-tighter text-black mb-2">

@@ -74,8 +74,8 @@ const getProducts = async (req, res, next) => {
       filter.$text = { $search: search.trim() };
     }
 
-    if (size) filter.size = size;
-    if (condition) filter.condition = condition;
+    if (size) filter.size = { $in: size.split(',') };
+    if (condition) filter.condition = { $in: condition.split(',') };
     if (status) filter.status = status;
 
     // Price range filter

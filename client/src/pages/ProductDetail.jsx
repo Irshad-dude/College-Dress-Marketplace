@@ -6,11 +6,12 @@ import {
   MdFavorite, MdFavoriteBorder, MdChat, MdCheckCircle, MdShare
 } from 'react-icons/md';
 import { getProductById, expressInterest, markAsSold } from '../services/productService';
-import { createOrGetChat } from '../services/chatService';
+import { createOrGetChat, sendMessage } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice, formatDate, getInitials } from '../utils/helpers';
 import Loader from '../components/Loader';
 import usePageTitle from '../hooks/usePageTitle';
+import DraggableShowcase from '../components/DraggableShowcase';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -49,8 +50,20 @@ export default function ProductDetail() {
     if (!user) return navigate('/login');
     setInterestLoading(true);
     try {
+      const sellerId = typeof seller === 'object' ? seller._id : seller;
+      const chatRes = await createOrGetChat({ sellerId, productId: id });
+      const chatId = chatRes.data?.chat?._id || chatRes.data?._id;
+      
+      if (chatId) {
+        await sendMessage({
+          chatId,
+          message: `I am interested in your item: ${product.title}`
+        });
+      }
+      
       await expressInterest(id);
       toast.success('Interest sent! The seller has been notified.');
+      navigate('/dashboard/chat');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to send interest');
     } finally {
@@ -250,6 +263,13 @@ export default function ProductDetail() {
               {product.description}
             </p>
           </div>
+
+          {/* Virtual Showcase Panel */}
+          {images[activeImg] && (
+            <div className="mb-10">
+              <DraggableShowcase imageUrl={images[activeImg]} />
+            </div>
+          )}
 
           {/* Seller Info Panel */}
           {seller && typeof seller === 'object' && (

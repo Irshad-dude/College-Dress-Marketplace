@@ -278,3 +278,50 @@
   animation: shimmer 1.5s infinite;
   border-radius: 0;
 }
+
+/* ─────────────────────────────────────────
+   BLUR-REVEAL ANIMATION (For Text)
+───────────────────────────────────────── */
+@keyframes blur-reveal {
+  0% {
+    opacity: 0;
+    filter: blur(16px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+.animate-blur-reveal {
+  opacity: 0; /* Starts hidden to prevent flash before JS/CSS applies */
+  animation: blur-reveal 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ─────────────────────────────────────────
+   HORIZONTAL TEXT ANIMATION (Global)
+───────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6, p {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: transform, filter;
+  animation: blur-scroll 5s ease-in-out infinite alternate;
+}
+
+@keyframes blur-scroll {
+  0% {
+    transform: translate3d(0, 0, 0); /* Keeps hardware acceleration */
+    filter: blur(4px);
+  }
+  20% {
+    filter: blur(0px);
+  }
+  80% {
+    filter: blur(0px);
+  }
+  100% {
+    transform: translate3d(0, 0, 0); /* No horizontal movement, stays in place */
+    filter: blur(4px);
+  }
+}
+
