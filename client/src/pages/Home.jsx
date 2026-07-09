@@ -56,6 +56,7 @@ const HERO_SLIDES = [
     btnClass: 'bg-white text-black hover:bg-gray-200'
   },
   {
+    bgImage: '/images/slide_2_sell.jpg',
     bg: '#F5F5F5',
     title: 'SELL YOUR\nCLOTHES',
     buttonText: 'START SELLING',
@@ -63,6 +64,7 @@ const HERO_SLIDES = [
     btnClass: 'bg-[#E16E50] text-white hover:bg-[#D45E3F]'
   },
   {
+    bgImage: '/images/slide_3_arrivals.jpg',
     bg: '#E16E50',
     title: 'NEW\nARRIVALS',
     buttonText: 'BROWSE',
@@ -110,7 +112,7 @@ export default function Home() {
             <div className="max-w-[1500px] w-full mx-auto relative z-10">
               <h1 
                 key={`title-${currentSlide}`} 
-                className={`text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-8 animate-blur-reveal ${slide.textColor}`}
+                className={`text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-8 ${slide.textColor}`}
               >
                 {slide.title}
               </h1>
@@ -195,61 +197,108 @@ export default function Home() {
         <div className="max-w-[1500px] mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row gap-4 md:gap-8">
             {/* Left Col */}
-            <div className="flex-1 bg-black text-white p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6 animate-blur-reveal">
-                SELL YOUR<br/>COLLEGE<br/>CLOTHES
-              </h2>
-              <p className="text-gray-400 mb-8 max-w-sm">
-                Turn your old uniforms and lab coats into cash. Join thousands of students already selling on our platform.
-              </p>
-              <div>
-                <Link to="/dashboard/add-product" className="inline-block bg-white text-black font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-200 transition-colors">
-                  List Now &rarr;
-                </Link>
+            <div className="flex-1 bg-black text-white p-12 md:p-16 flex flex-col justify-center min-h-[400px] relative overflow-hidden group">
+              <img src="/images/promo_split_left.jpg" alt="Sell Clothes Background" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <h2 className=" text-white text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+                  SELL YOUR<br/>COLLEGE<br/>CLOTHES
+                </h2>
+                <p className="text-gray-300 mb-8 max-w-sm">
+                  Turn your old uniforms and lab coats into cash. Join thousands of students already selling on our platform.
+                </p>
+                <div>
+                  <Link to="/dashboard/add-product" className="inline-block bg-white text-black font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-200 transition-colors">
+                    List Now &rarr;
+                  </Link>
+                </div>
               </div>
             </div>
             
             {/* Right Col */}
-            <div className="flex-1 bg-[#F5F5F5] text-black p-12 md:p-16 flex flex-col justify-center min-h-[400px]">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6 animate-blur-reveal" style={{ animationDelay: '200ms' }}>
-                FIND YOUR<br/>SIZE
-              </h2>
-              <p className="text-gray-600 mb-8 max-w-sm">
-                From XS to 6XL, we have sizes that fit everyone. Browse our inclusive collection of college wear.
-              </p>
-              <div>
-                <Link to="/products" className="inline-block bg-black text-white font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-800 transition-colors">
-                  Browse &rarr;
-                </Link>
+            <div className="flex-1 bg-[#F5F5F5] text-black p-12 md:p-16 flex flex-col justify-center min-h-[400px] relative overflow-hidden group">
+              <img src="/images/promo_split_right.jpg" alt="Find Size Background" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-none mb-6">
+                  FIND YOUR<br/>SIZE
+                </h2>
+                <p className="text-gray-700 font-medium mb-8 max-w-sm">
+                  From XS to 6XL, we have sizes that fit everyone. Browse our inclusive collection of college wear.
+                </p>
+                <div>
+                  <Link to="/products" className="inline-block bg-black text-white font-bold uppercase tracking-widest px-8 py-4 text-sm hover:bg-gray-800 transition-colors">
+                    Browse &rarr;
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </RevealSection>
 
-      {/* ── 5. TRUST STRIP ──────────────────────────────────────────────── */}
-      <RevealSection className="bg-black py-16">
-        <div className="max-w-[1500px] mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            <div className="flex flex-col items-center gap-3">
-              <MdSchool className="text-4xl text-[#E16E50]" />
-              <span className="text-sm font-bold uppercase tracking-widest">1000+ Sellers</span>
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              <MdStar className="text-4xl text-[#E16E50]" />
-              <span className="text-sm font-bold uppercase tracking-widest">5000+ Products</span>
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              <MdLocalShipping className="text-4xl text-[#E16E50]" />
-              <span className="text-sm font-bold uppercase tracking-widest">Fast Shipping</span>
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              <MdVerified className="text-4xl text-[#E16E50]" />
-              <span className="text-sm font-bold uppercase tracking-widest">Verified Users</span>
-            </div>
+      {/* ── 5. TRUST STRIP (Marquee) ────────────────────────────────────── */}
+      <section className="bg-[#0a0a0a] py-10 md:py-12 relative overflow-hidden flex items-center border-y border-white/5">
+        {/* Edge Blur Masks for smooth fade in/out */}
+        <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
+
+        <div className="flex w-max animate-marquee">
+          {/* Half 1 */}
+          <div className="flex items-center justify-around w-max">
+            {[...Array(3)].map((_, setIdx) => (
+              <div key={`set1-${setIdx}`} className="flex items-center">
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdSchool className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">1000+ Sellers</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdStar className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">5000+ Products</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdLocalShipping className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">Fast Shipping</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdVerified className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">Verified Users</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+              </div>
+            ))}
+          </div>
+          
+          {/* Half 2 (Exact duplicate for seamless looping) */}
+          <div className="flex items-center justify-around w-max">
+            {[...Array(3)].map((_, setIdx) => (
+              <div key={`set2-${setIdx}`} className="flex items-center">
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdSchool className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">1000+ Sellers</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdStar className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">5000+ Products</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdLocalShipping className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">Fast Shipping</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+                <div className="flex items-center gap-3 md:gap-4 mx-8 md:mx-16 group">
+                  <MdVerified className="text-xl md:text-2xl text-gray-600 group-hover:text-white transition-colors duration-500" />
+                  <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors duration-500">Verified Users</span>
+                </div>
+                <span className="text-gray-800 text-xl">•</span>
+              </div>
+            ))}
           </div>
         </div>
-      </RevealSection>
+      </section>
 
       {/* ── 6. NEWSLETTER ────────────────────────────────────────────────── */}
       <RevealSection className="py-24 bg-white text-center">
