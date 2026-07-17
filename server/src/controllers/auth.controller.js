@@ -61,23 +61,23 @@ const clearAuthCookies = (res) => {
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, collegeName } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
     }
 
-    const user = await User.create({ name, email, password, role: role || 'buyer' });
+    const user = await User.create({ name, email, password, role: role || 'buyer', collegeName });
     const { accessToken } = setAuthCookies(res, user._id);
 
-    logger.info({ userId: user._id, email: user.email }, 'New user registered');
+    logger.info({ userId: user._id, email: user.email, collegeName }, 'New user registered');
 
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
       token: accessToken, // In-memory use for Socket.IO only
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, createdAt: user.createdAt },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, collegeName: user.collegeName, profileImage: user.profileImage, createdAt: user.createdAt },
     });
   } catch (error) {
     next(error);
@@ -105,7 +105,7 @@ const login = async (req, res, next) => {
       success: true,
       message: 'Login successful.',
       token: accessToken,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage, createdAt: user.createdAt },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, collegeName: user.collegeName, profileImage: user.profileImage, createdAt: user.createdAt },
     });
   } catch (error) {
     next(error);
@@ -158,7 +158,7 @@ const refreshToken = async (req, res, next) => {
     res.status(200).json({
       success: true,
       token: newAccessToken, // New in-memory token for Socket.IO
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, collegeName: user.collegeName, profileImage: user.profileImage },
     });
   } catch (error) {
     next(error);

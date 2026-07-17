@@ -4,6 +4,7 @@ import { MdArrowForward, MdSchool, MdVerified, MdLocalShipping, MdStar } from 'r
 import { getProducts } from '../services/productService';
 import ProductCard from '../components/ProductCard';
 import SkeletonCard from '../components/SkeletonCard';
+import { useAuth } from '../context/AuthContext';
 
 /* ─────────────────────────── Intersection observer hook ─────────────────── */
 function useReveal() {
@@ -74,6 +75,7 @@ const HERO_SLIDES = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -86,11 +88,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    getProducts({ limit: 8, status: 'available' })
+    const params = { limit: 8, status: 'available' };
+    if (user?.collegeName) {
+      params.collegeName = user.collegeName;
+    }
+    getProducts(params)
       .then(r => setProducts(r.data.products || r.data || []))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -144,7 +150,7 @@ export default function Home() {
       <RevealSection className="py-16 md:py-24">
         <div className="max-w-[1500px] mx-auto px-4 md:px-8">
           <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-gray-400 text-center mb-10">
-            Shop By Category
+            {user?.collegeName ? `Categories at ${user.collegeName}` : 'Shop By Category'}
           </h2>
           <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 md:gap-6 pb-4 md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
             {CATEGORIES.map((cat, i) => (
@@ -170,7 +176,9 @@ export default function Home() {
       <RevealSection className="py-16 bg-white">
         <div className="max-w-[1500px] mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold uppercase tracking-tight mb-2">Trending Now</h2>
+            <h2 className="text-3xl font-bold uppercase tracking-tight mb-2">
+              {user?.collegeName ? `Trending at ${user.collegeName}` : 'Trending Now'}
+            </h2>
             <p className="text-sm text-gray-500 uppercase tracking-widest">Most popular items this week</p>
           </div>
           

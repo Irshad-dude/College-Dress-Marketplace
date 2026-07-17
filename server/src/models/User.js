@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
     enum: ['buyer', 'seller', 'admin'],
     default: 'buyer',
   },
+  collegeName: {
+    type: String,
+    required: [true, 'College name is required'],
+    trim: true,
+  },
   profileImage: {
     type: String,
     default: '',

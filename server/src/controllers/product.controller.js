@@ -9,7 +9,15 @@ const cloudinary = require('../config/cloudinary');
  */
 const createProduct = async (req, res, next) => {
   try {
-    const { title, description, price, size, condition, collegeName, department } = req.body;
+    const { title, description, price, size, condition, department } = req.body;
+
+    // Securely inherit collegeName from the logged-in user
+    const User = require('../models/User');
+    const seller = await User.findById(req.user.id);
+    if (!seller || !seller.collegeName) {
+      return res.status(403).json({ success: false, message: 'Seller college information is missing.' });
+    }
+    const collegeName = seller.collegeName;
 
     // Images come from uploadImages middleware → req.cloudinaryUrls
     // Fallback: if images[] URLs were sent as JSON strings in body
@@ -19,10 +27,10 @@ const createProduct = async (req, res, next) => {
         ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images])
         : [];
 
-    if (!title || !description || !price || !size || !condition || !collegeName) {
+    if (!title || !description || !price || !size || !condition) {
       return res.status(400).json({
         success: false,
-        message: 'Title, description, price, size, condition and college name are required.',
+        message: 'Title, description, price, size, and condition are required.',
       });
     }
 
@@ -63,6 +71,7 @@ const getProducts = async (req, res, next) => {
       minPrice,
       maxPrice,
       status,
+      collegeName,
       page = 1,
       limit = 20,
     } = req.query;
@@ -77,6 +86,7 @@ const getProducts = async (req, res, next) => {
     if (size) filter.size = { $in: size.split(',') };
     if (condition) filter.condition = { $in: condition.split(',') };
     if (status) filter.status = status;
+    if (collegeName) filter.collegeName = collegeName;
 
     // Price range filter
     if (minPrice !== undefined || maxPrice !== undefined) {

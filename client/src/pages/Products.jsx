@@ -6,9 +6,11 @@ import ProductCard from '../components/ProductCard';
 import SkeletonCard from '../components/SkeletonCard';
 import FilterSidebar from '../components/FilterSidebar';
 import { MdSearch, MdKeyboardArrowDown } from 'react-icons/md';
+import { useAuth } from '../context/AuthContext';
 
 export default function Products() {
   usePageTitle('Shop All');
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
@@ -40,6 +42,7 @@ export default function Products() {
       if (condition) params.condition = condition;
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
+      if (user?.collegeName) params.collegeName = user.collegeName;
       const res = await getProducts(params);
       setProducts(res.data.products || []);
       setTotal(res.data.total || 0);
@@ -49,7 +52,7 @@ export default function Products() {
     } finally {
       setLoading(false);
     }
-  }, [search, size, condition, minPrice, maxPrice, sort, page]);
+  }, [search, size, condition, minPrice, maxPrice, sort, page, user?.collegeName]);
 
   useEffect(() => {
     fetchProducts();

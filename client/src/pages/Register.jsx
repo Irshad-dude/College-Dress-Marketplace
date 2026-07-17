@@ -39,6 +39,19 @@ function PasswordStrength({ password }) {
   );
 }
 
+const INDIAN_COLLEGES = [
+  'IIT Bombay',
+  'IIT Delhi',
+  'NIT Trichy',
+  'BITS Pilani',
+  'Delhi University',
+  'Anna University',
+  'Jadavpur University',
+  'VIT Vellore',
+  'SRCC Delhi',
+  'NID Ahmedabad'
+];
+
 export default function Register() {
   usePageTitle('Register');
   const { register: registerUser } = useAuth();
@@ -127,6 +140,30 @@ export default function Register() {
             />
             {fieldError('email') && (
               <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-2">⚠ {fieldError('email')}</p>
+            )}
+          </div>
+
+          {/* College Dropdown */}
+          <div className="relative">
+            <select
+              className={`w-full border-b border-black py-3 px-0 text-sm focus:outline-none focus:border-[#E16E50] font-bold tracking-wider transition-colors bg-transparent appearance-none rounded-none cursor-pointer ${fieldError('collegeName') ? 'border-red-500 text-red-500' : 'text-black'}`}
+              {...register('collegeName', {
+                required: 'Please select your college',
+              })}
+              defaultValue=""
+            >
+              <option value="" disabled className="text-gray-400">SELECT YOUR COLLEGE</option>
+              {INDIAN_COLLEGES.map(college => (
+                <option key={college} value={college} className="text-black">
+                  {college}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-black">
+              ▼
+            </div>
+            {fieldError('collegeName') && (
+              <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-2">⚠ {fieldError('collegeName')}</p>
             )}
           </div>
 

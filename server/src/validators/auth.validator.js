@@ -16,6 +16,10 @@ const registerValidationRules = [
     .isEmail().withMessage('Please provide a valid email address.')
     .normalizeEmail(),
 
+  body('collegeName')
+    .trim()
+    .notEmpty().withMessage('College name is required.'),
+
   body('password')
     .notEmpty().withMessage('Password is required.')
     .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long.')
