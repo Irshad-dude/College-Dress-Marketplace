@@ -5,8 +5,6 @@ export default function Footer() {
     <footer className="bg-black text-white pt-16 pb-24 md:pb-12 border-t border-gray-800">
       <div className="max-w-[1500px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          
-          {/* ── Brand ────────────────────────────────────────────── */}
           <div className="flex flex-col gap-4">
             <Link to="/" className="inline-block">
               <span className="font-bold text-2xl tracking-tighter uppercase text-white">
@@ -18,8 +16,6 @@ export default function Footer() {
               lab coats, and formal wear with fellow students.
             </p>
           </div>
-
-          {/* ── Quick Links ──────────────────────────────────────── */}
           <div className="flex flex-col gap-4">
             <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-2">Explore</h4>
             <nav className="flex flex-col gap-3">
@@ -29,8 +25,6 @@ export default function Footer() {
               <Link to="/products?search=lab+coat" className="text-sm text-gray-400 hover:text-white transition-colors uppercase tracking-wide">Lab Coats</Link>
             </nav>
           </div>
-
-          {/* ── Help ─────────────────────────────────────────────── */}
           <div className="flex flex-col gap-4">
             <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-2">Help</h4>
             <nav className="flex flex-col gap-3">
@@ -40,8 +34,6 @@ export default function Footer() {
               <Link to="#" className="text-sm text-gray-400 hover:text-white transition-colors uppercase tracking-wide">Contact Us</Link>
             </nav>
           </div>
-
-          {/* ── Legal ────────────────────────────────────────────── */}
           <div className="flex flex-col gap-4">
             <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-2">Legal</h4>
             <nav className="flex flex-col gap-3">
@@ -52,8 +44,6 @@ export default function Footer() {
           </div>
 
         </div>
-
-        {/* ── Bottom Bar ───────────────────────────────────────── */}
         <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500 tracking-wide">
             &copy; {new Date().getFullYear()} DRESSMARKET. ALL RIGHTS RESERVED.

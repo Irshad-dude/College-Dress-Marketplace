@@ -72,6 +72,7 @@ const getProducts = async (req, res, next) => {
       maxPrice,
       status,
       collegeName,
+      sort,
       page = 1,
       limit = 20,
     } = req.query;
@@ -99,10 +100,14 @@ const getProducts = async (req, res, next) => {
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
     const skip = (pageNum - 1) * limitNum;
 
+    let sortObj = { createdAt: -1 };
+    if (sort === 'price_asc') sortObj = { price: 1 };
+    else if (sort === 'price_desc') sortObj = { price: -1 };
+
     const [products, total] = await Promise.all([
       Product.find(filter)
         .populate('sellerId', 'name email profileImage')
-        .sort({ createdAt: -1 })
+        .sort(sortObj)
         .skip(skip)
         .limit(limitNum),
       Product.countDocuments(filter),
@@ -217,7 +222,7 @@ const deleteProduct = async (req, res, next) => {
       });
     }
 
-    if (product.sellerId.toString() !== req.user.id) {
+    if (product.sellerId.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Not authorized. You can only delete your own listings.',
@@ -325,11 +330,55 @@ const markAsSold = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get logged in user products
+ * @route   GET /api/v1/products/my-products
+ * @access  Private
+ */
+const getMyProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({ sellerId: req.user.id })
+      .populate('sellerId', 'name email profileImage')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get all products across the platform (admin only)
+ * @route   GET /api/v1/products/admin/all
+ * @access  Private/Admin
+ */
+const getAdminProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({})
+      .populate('sellerId', 'name email profileImage')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createProduct,
   getProducts,
+  getAdminProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  getMyProducts,
   markAsSold,
 };

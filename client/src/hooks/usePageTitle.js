@@ -1,8 +1,4 @@
-/**
- * usePageTitle.js — L25 Fix
- * Sets the browser tab title for each page.
- * Auto-resets to the app name on unmount.
- */
+
 import { useEffect } from 'react';
 
 const APP_NAME = 'College Dress Marketplace';

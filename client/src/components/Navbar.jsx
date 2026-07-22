@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { MdSearch, MdClose, MdMenu, MdPerson, MdLogout, MdDashboard, MdHome, MdExplore, MdAdd, MdChat } from 'react-icons/md';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { MdSearch, MdClose, MdMenu, MdPerson, MdLogout, MdDashboard, MdHome, MdExplore, MdAdd, MdChat, MdAdminPanelSettings } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { getInitials } from '../utils/helpers';
@@ -13,14 +13,13 @@ const NAV_LINKS = [
   { label: 'BLAZERS', href: '/products?search=blazer' },
   { label: 'SAREES', href: '/products?search=saree' },
 ];
-
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -29,14 +28,11 @@ export default function Navbar() {
       setIsMobileMenuOpen(false);
     }
   };
-
   const navLinkStyle = ({ isActive }) => ({
     color: isActive ? '#E16E50' : '#000000',
     borderBottom: isActive ? '2px solid #E16E50' : '2px solid transparent',
   });
-
   const baseNavLinkClass = "py-1.5 text-xs font-bold tracking-[0.1em] transition-colors hover:text-[#E16E50]";
-
   return (
     <>
       {/* ── Top Announcement Marquee ──────────────────────────────────── */}
@@ -75,18 +71,23 @@ export default function Navbar() {
 
             {/* Desktop Nav Links */}
             <div className="hidden md:flex flex-1 justify-center gap-8">
-              {NAV_LINKS.map(link => (
-                <NavLink 
-                  key={link.label} 
-                  to={link.href} 
-                  style={navLinkStyle}
-                  className={baseNavLinkClass}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
+              {NAV_LINKS.map(link => {
+                const isExactActive = (location.pathname + location.search) === link.href || (location.pathname === link.href && !location.search && !link.href.includes('?'));
+                return (
+                  <Link 
+                    key={link.label} 
+                    to={link.href} 
+                    style={{
+                      color: isExactActive ? '#E16E50' : '#000000',
+                      borderBottom: isExactActive ? '2px solid #E16E50' : '2px solid transparent',
+                    }}
+                    className={baseNavLinkClass}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </div>
-
             {/* Right Icons */}
             <div className="flex items-center gap-2 md:gap-4">
               <form onSubmit={handleSearch} className="hidden md:flex relative">
@@ -101,11 +102,9 @@ export default function Navbar() {
                   <MdSearch size={18} />
                 </button>
               </form>
-
               {user ? (
                 <>
                   <NotificationBell />
-                  
                   <div className="relative hidden md:block">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -116,13 +115,17 @@ export default function Navbar() {
                         {getInitials(user.name)}
                       </div>
                     </button>
-
                     {/* Dropdown Menu */}
                     {isDropdownOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg py-1 text-sm font-medium z-50">
                         <div className="px-4 py-2 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider truncate">
                           {user.email}
                         </div>
+                        {user.role === 'admin' && (
+                          <Link to="/dashboard/admin" className="flex items-center gap-2 px-4 py-2.5 text-black hover:bg-gray-50 transition-colors uppercase tracking-wide text-xs">
+                            <MdAdminPanelSettings size={16} /> Admin Panel
+                          </Link>
+                        )}
                         <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2.5 text-black hover:bg-gray-50 transition-colors uppercase tracking-wide text-xs">
                           <MdDashboard size={16} /> Dashboard
                         </Link>
@@ -150,7 +153,6 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-
         {/* Mobile Menu Drawer */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg pb-6 px-4 z-50">
@@ -188,7 +190,6 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* ── Mobile Bottom Tab Bar ───────────────────────────────────── */}
       <nav 
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 w-full h-[65px] bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] safe-area-bottom pb-2 pt-1" 
         style={{ willChange: 'transform', transform: 'translateZ(0)' }}

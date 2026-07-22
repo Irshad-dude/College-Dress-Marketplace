@@ -1,12 +1,3 @@
-/**
- * AuthContext — Session management
- *
- * Fixes applied:
- *  - visibilitychange is DEBOUNCED (5s) so rapid tab switches don't spam /profile
- *  - restoreSession is called ONCE on mount, not on every re-render
- *  - Token stored in window.__authToken__ (in-memory, XSS-safe) for Socket.IO
- *  - No localStorage usage — httpOnly cookie handles persistence
- */
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import * as authService from '../services/authService';
@@ -17,8 +8,6 @@ export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
   const [token, setToken]     = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Track whether the initial mount fetch has completed
   const mountedRef    = useRef(false);
   // Debounce timer for visibilitychange
   const visTimerRef   = useRef(null);

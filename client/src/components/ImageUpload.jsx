@@ -9,7 +9,6 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
     existingImages.map((url) => ({ url, file: null }))
   );
   const [dragging, setDragging] = useState(false);
-
   const processFiles = useCallback(
     (files) => {
       const validFiles = Array.from(files).filter((f) => {
@@ -17,39 +16,32 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
         if (f.size > MAX_SIZE_MB * 1024 * 1024) return false;
         return true;
       });
-
       const remaining = MAX_FILES - previews.length;
       const toAdd = validFiles.slice(0, remaining);
-
       const newPreviews = toAdd.map((file) => ({
         url: URL.createObjectURL(file),
         file,
       }));
-
       const updated = [...previews, ...newPreviews];
       setPreviews(updated);
       onImagesChange(updated.map((p) => p.file).filter(Boolean));
     },
     [previews, onImagesChange]
   );
-
   const handleDrop = (e) => {
     e.preventDefault();
     setDragging(false);
     processFiles(e.dataTransfer.files);
   };
-
   const handleChange = (e) => {
     processFiles(e.target.files);
     e.target.value = '';
   };
-
   const removeImage = (index) => {
     const updated = previews.filter((_, i) => i !== index);
     setPreviews(updated);
     onImagesChange(updated.map((p) => p.file).filter(Boolean));
   };
-
   return (
     <div className="space-y-3">
       {/* Drop Zone */}
@@ -74,7 +66,6 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
           <input type="file" multiple accept="image/*" onChange={handleChange} className="hidden" />
         </label>
       )}
-
       {/* Thumbnails */}
       {previews.length > 0 && (
         <div className="flex flex-wrap gap-3">

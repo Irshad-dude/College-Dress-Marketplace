@@ -16,6 +16,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
 const logger = require('../utils/logger');
+const Product = require('../models/Product');
+const cloudinary = require('../config/cloudinary');
 
 // ── Cookie helpers ─────────────────────────────────────────────────────────────
 
@@ -255,4 +257,62 @@ const changePassword = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, logout, refreshToken, getProfile, updateProfile, changePassword };
+/**
+ * @desc    Get all users (Admin only)
+ * @route   GET /api/v1/auth/admin/users
+ * @access  Private/Admin
+ */
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, count: users.length, users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Delete user account (Admin only)
+ * @route   DELETE /api/v1/auth/admin/users/:id
+ * @access  Private/Admin
+ */
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    // 1. Fetch all products owned by this user
+    const products = await Product.find({ sellerId: user._id });
+
+    // 2. Delete all Cloudinary images for these products
+    for (const product of products) {
+      if (product.images && product.images.length > 0) {
+        const deletePromises = product.images.map((imageUrl) => {
+          const parts = imageUrl.split('/');
+          const fileWithExt = parts[parts.length - 1];
+          const fileName = fileWithExt.split('.')[0];
+          const folder = parts[parts.length - 2];
+          const publicId = `${folder}/${fileName}`;
+
+          return cloudinary.uploader.destroy(publicId).catch((err) => {
+            console.warn(`Failed to delete Cloudinary image: ${publicId}`, err.message);
+          });
+        });
+        await Promise.all(deletePromises);
+      }
+    }
+
+    // 3. Delete all product documents
+    await Product.deleteMany({ sellerId: user._id });
+
+    // 4. Finally, delete the user
+    await User.findByIdAndDelete(req.params.id);
+    
+    logger.info({ userId: req.params.id }, 'User and their listings deleted by admin');
+    res.status(200).json({ success: true, message: 'User and all their listings deleted successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, logout, refreshToken, getProfile, updateProfile, changePassword, getAllUsers, deleteUser };

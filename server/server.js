@@ -1,13 +1,3 @@
-/**
- * server.js — College Dress Marketplace API entry point
- *
- * Security & Infrastructure:
- *  C1  — httpOnly cookies via cookie-parser
- *  C4  — NoSQL injection via express-mongo-sanitize
- *  C5  — Graceful shutdown (server.close before exit)
- *  L23 — Structured logging via pino
- *  M22 — Multi-origin production CORS
- */
 
 require('dotenv').config();
 
@@ -23,7 +13,7 @@ const logger         = require('./src/utils/logger');
 const connectDB      = require('./src/config/db');
 const { initSocket } = require('./src/sockets/socket');
 
-// ── Routes ─────────────────────────────────────────────────────────────────────
+// ── Routes
 const authRoutes         = require('./src/routes/auth.routes');
 const productRoutes      = require('./src/routes/product.routes');
 const chatRoutes         = require('./src/routes/chat.routes');
@@ -32,7 +22,7 @@ const notificationRoutes = require('./src/routes/notification.routes');
 const uploadRoutes       = require('./src/routes/upload.routes');
 const errorHandler       = require('./src/middleware/error.middleware');
 
-// ── App ────────────────────────────────────────────────────────────────────────
+// ── App 
 const app = express();
 
 // Security headers
@@ -43,7 +33,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   'http://localhost:5173',
   'http://localhost:3000',
-  /^https:\/\/.*\.vercel\.app$/, // All Vercel preview deployments
+  /^https:\/\/.*\.vercel\.app$/, 
 ];
 
 if (process.env.EXTRA_ORIGINS) {
@@ -52,7 +42,7 @@ if (process.env.EXTRA_ORIGINS) {
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server requests (no origin header) and Postman
+
     if (!origin) return callback(null, true);
     const allowed = allowedOrigins.some(o =>
       typeof o === 'string' ? o === origin : o.test(origin)
@@ -63,49 +53,38 @@ app.use(cors({
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // Required for httpOnly cookies
+  credentials: true, 
 }));
 
-// Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// C1: httpOnly cookie parsing
 app.use(cookieParser());
 
-// C4: Strip MongoDB operators from all inputs ($, .)
 app.use(mongoSanitize({ replaceWith: '_' }));
-
-// ── Rate limiters ───────────────────────────────────────────────────────────────
-
-// STRICT: Only for login & register — prevents brute-force and credential stuffing
-// ⚠ Must NOT be applied to /profile or /refresh-token (those are called frequently)
 const authStrictLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000, 
   max: process.env.NODE_ENV === 'production' ? 10 : 50,
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
   message: { success: false, message: 'Too many login attempts. Please wait 1 minute and try again.' },
 });
-
-// RELAXED: General API limiter — covers all other endpoints
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 500, // Generous — profile fetch on every HMR reload is expected in dev
+  max: 500, 
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests. Please slow down.' },
 });
 
-// Apply strict limiter ONLY to credential endpoints
+
 app.use('/api/v1/auth/login',    authStrictLimiter);
 app.use('/api/v1/auth/register', authStrictLimiter);
 
-// Apply relaxed limiter to everything else
+
 app.use('/api/', apiLimiter);
 
-// ── Health check ────────────────────────────────────────────────────────────────
+
 app.get('/health', (req, res) =>
   res.status(200).json({
     success: true,

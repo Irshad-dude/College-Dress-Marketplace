@@ -7,20 +7,17 @@ export default function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-
     if (isOpen) {
       dialog.showModal();
     } else {
       dialog.close();
     }
   }, [isOpen]);
-
   const handleBackdropClick = (e) => {
     if (e.target === dialogRef.current) {
       onClose();
     }
   };
-
   return (
     <dialog
       ref={dialogRef}
@@ -31,8 +28,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
         open:animate-[fadeIn_0.15s_ease-out]
         m-auto
       "
-      style={{ maxHeight: '90vh', overflow: 'auto' }}
-    >
+      style={{ maxHeight: '90vh', overflow: 'auto' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <h2 className="text-lg font-bold text-gray-900">{title}</h2>

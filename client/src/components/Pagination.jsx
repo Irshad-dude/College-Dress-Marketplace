@@ -15,7 +15,6 @@ export default function Pagination({ page, pages, onPageChange }) {
       >
         ← Prev
       </button>
-
       {range.map((p) => (
         <button
           key={p}
@@ -30,12 +29,10 @@ export default function Pagination({ page, pages, onPageChange }) {
           {p}
         </button>
       ))}
-
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page === pages}
-        className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
+        className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
         Next →
       </button>
     </div>

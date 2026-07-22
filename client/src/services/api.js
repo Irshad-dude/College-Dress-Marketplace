@@ -1,17 +1,6 @@
-/**
- * api.js — Axios instance with auth interceptors
- *
- * C1: withCredentials sends httpOnly cookies automatically
- * H6: On 401 with expired:true, auto-call /auth/refresh-token once, then retry
- * M17: On unrecoverable 401 from a PROTECTED route, redirect to /login
- *
- * ⚠ IMPORTANT: /auth/profile and /auth/refresh-token returning 401 is NORMAL
- * when the user is not logged in — do NOT redirect to /login in those cases
- * or it will cause an infinite redirect loop on the login page itself.
- */
+
 import axios from 'axios';
 
-// Routes that are allowed to return 401 without triggering a redirect
 const SILENT_401_ROUTES = [
   '/auth/profile',
   '/auth/refresh-token',
@@ -25,10 +14,9 @@ const isSilentRoute = (url = '') =>
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true, // C1: Send httpOnly cookies with every request
+  withCredentials: true,
 });
 
-// ── Request interceptor — attach Bearer token if available ────────────────────
 api.interceptors.request.use(
   (config) => {
     const token = window.__authToken__;
@@ -37,8 +25,6 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-// ── Response interceptor — token refresh + auto-logout ────────────────────────
 let isRefreshing = false;
 let refreshQueue = [];
 
@@ -52,8 +38,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const requestUrl = originalRequest?.url || '';
-
-    // H6: If 401 with expired flag, try refresh-token once (skip for auth routes)
     if (
       error.response?.status === 401 &&
       error.response?.data?.expired === true &&
@@ -86,7 +70,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         window.__authToken__ = null;
-        // Only redirect if we're not already on an auth page
         if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
           window.location.href = '/login';
         }
@@ -95,8 +78,6 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
-    // M17: Redirect to /login on 401 from protected routes (not auth routes)
     if (
       error.response?.status === 401 &&
       !originalRequest._retried &&

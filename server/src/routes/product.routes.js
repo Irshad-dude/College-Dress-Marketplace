@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createProduct,
   getProducts,
+  getAdminProducts,
   getProductById,
   updateProduct,
   deleteProduct,
@@ -17,6 +18,9 @@ const { uploadImages } = require('../middleware/upload.middleware');
 router.route('/')
   .get(getProducts)
   .post(protect, requireRole('seller'), uploadImages, createProduct);
+
+// GET /api/v1/products/admin/all — Get all products (admin only)
+router.get('/admin/all', protect, requireRole('admin'), getAdminProducts);
 
 // GET    /api/v1/products/:id  — Get single product
 // PUT    /api/v1/products/:id  — Update product (auth, seller only, optional image re-upload)

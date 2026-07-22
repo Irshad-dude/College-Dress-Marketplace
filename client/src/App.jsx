@@ -21,6 +21,7 @@ import MyProducts from './pages/MyProducts';
 import Chat from './pages/Chat';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
               <Route element={<PrivateRoute />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard/admin" element={<AdminDashboard />} />
                   <Route path="/dashboard/add-product" element={<AddProduct />} />
                   <Route path="/dashboard/my-products" element={<MyProducts />} />
                   <Route path="/dashboard/chat" element={<Chat />} />

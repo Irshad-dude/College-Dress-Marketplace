@@ -12,7 +12,6 @@ export default function NotificationBell() {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -20,9 +19,7 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
   const latest5 = notifications.slice(0, 5);
-
   return (
     <div className="relative" ref={ref}>
       <button
@@ -36,7 +33,6 @@ export default function NotificationBell() {
           </span>
         )}
       </button>
-
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
           {/* Header */}
@@ -51,7 +47,6 @@ export default function NotificationBell() {
               </button>
             )}
           </div>
-
           {/* Items */}
           <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
             {latest5.length === 0 ? (
@@ -60,14 +55,12 @@ export default function NotificationBell() {
               latest5.map((n) => <NotificationItem key={n._id} notification={n} />)
             )}
           </div>
-
           {/* Footer */}
           <div className="px-4 py-3 border-t border-gray-100 text-center">
             <Link
               to="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs text-amber-800 hover:text-amber-900 font-semibold"
-            >
+              className="text-xs text-amber-800 hover:text-amber-900 font-semibold">
               View all notifications →
             </Link>
           </div>

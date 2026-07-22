@@ -8,11 +8,9 @@ const typeIcons = {
   sold: <MdSell className="text-green-500" />,
   default: <MdInfo className="text-amber-800" />,
 };
-
 export default function NotificationItem({ notification }) {
   const { type, title, message, createdAt, read } = notification;
   const icon = typeIcons[type] || typeIcons.default;
-
   return (
     <div
       className={clsx(

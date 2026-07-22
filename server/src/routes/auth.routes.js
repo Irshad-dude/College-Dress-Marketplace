@@ -9,8 +9,10 @@ const {
   getProfile,
   updateProfile,
   changePassword,
+  getAllUsers,
+  deleteUser,
 } = require('../controllers/auth.controller');
-const { protect } = require('../middleware/auth.middleware');
+const { protect, requireRole } = require('../middleware/auth.middleware');
 const {
   registerValidationRules,
   loginValidationRules,
@@ -37,5 +39,11 @@ router.put('/profile', protect, updateProfile);
 
 // PUT  /api/v1/auth/password — change password (H7)
 router.put('/password', protect, changePassword);
+
+// GET /api/v1/auth/admin/users — Get all users (Admin)
+router.get('/admin/users', protect, requireRole('admin'), getAllUsers);
+
+// DELETE /api/v1/auth/admin/users/:id — Delete user (Admin)
+router.delete('/admin/users/:id', protect, requireRole('admin'), deleteUser);
 
 module.exports = router;
