@@ -26,16 +26,16 @@ const isProduction = process.env.NODE_ENV === 'production';
 /** Access token cookie — short-lived (15 min) */
 const accessCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: 'strict',
+  secure: true,          // Must be true when sameSite is 'none'
+  sameSite: isProduction ? 'none' : 'strict', // 'none' allows cross-site (Netlify → Render)
   maxAge: 15 * 60 * 1000, // 15 minutes in ms
 };
 
 /** Refresh token cookie — long-lived (7 days) */
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: 'strict',
+  secure: true,          // Must be true when sameSite is 'none'
+  sameSite: isProduction ? 'none' : 'strict', // 'none' allows cross-site (Netlify → Render)
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 
@@ -50,8 +50,9 @@ const setAuthCookies = (res, userId) => {
 
 /** Clear both auth cookies (for logout) */
 const clearAuthCookies = (res) => {
-  res.clearCookie('jwt',          { httpOnly: true, secure: isProduction, sameSite: 'strict' });
-  res.clearCookie('refreshToken', { httpOnly: true, secure: isProduction, sameSite: 'strict' });
+  const clearOpts = { httpOnly: true, secure: true, sameSite: isProduction ? 'none' : 'strict' };
+  res.clearCookie('jwt', clearOpts);
+  res.clearCookie('refreshToken', clearOpts);
 };
 
 // ── Controllers ────────────────────────────────────────────────────────────────
